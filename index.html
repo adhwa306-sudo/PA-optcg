@@ -232,7 +232,24 @@
       .form-grid, .buyer-form { grid-template-columns: 1fr; }
       .btn-del { margin-left: 0; }
     }
-  </style>
+  </style>.btn-order {
+      display: inline-block;
+      text-decoration: none;
+      background: #16a34a;
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+    .btn-order.disabled {
+      background: #e5e7eb;
+      color: #6b7280;
+      pointer-events: none;
+    }
 </head>
 <body>
   <div class="container">
@@ -281,7 +298,18 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
+  <script>const WHATSAPP_NUMBER = '60129456492';function getWhatsAppOrderUrl(item, available) {
+      const cleanPhone = WHATSAPP_NUMBER.replace(/\D/g, '');
+      const priceText = formatPrice(item.price);
+      const noteLine = item.note ? `\n• Catatan: ${item.note}` : '';
+      const message =
+        `Hi, saya berminat nak pre-order item ini:\n` +
+        `• Item: ${item.name}\n` +
+        `• Harga: ${priceText}\n` +
+        `• Baki slot available: ${available} pcs` +
+        noteLine;
+      return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    }
     const SUPABASE_URL = 'https://bqcyaqqmfbgnyhhsjjwi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Vay2hyDEviMK6BkHoRmcHQ_D6ipokFc';
     const ADMIN_PIN = 'Adhwa95#1995';
@@ -427,7 +455,31 @@
             ${item.note ? `<div class="sub" style="margin:0 0 8px;">${escapeHtml(item.note)}</div>` : ''}
 
             <div class="stats">
+              <div><div class="stats">
               <div>
+                <div class="stat-num">${total}</div>
+                <div class="stat-label">Jumlah Slot</div>
+              </div>
+              <div>
+                <div class="stat-num">${bought} pcs</div>
+                <div class="stat-label">Sudah Beli</div>
+              </div>
+              <div>
+                <div class="stat-num">${available} pcs</div>
+                <div class="stat-label">Masih Available</div>
+              </div>
+            </div>
+
+            ${isSoldOut
+              ? `<span class="btn-order disabled">SOLD OUT</span>`
+              : `<a href="${escapeAttr(getWhatsAppOrderUrl(item, available))}" target="_blank" rel="noopener noreferrer" class="btn-order">Order Now (WhatsApp)</a>`
+            }
+
+            <div class="buyers-box">
+              <div class="buyers-title">Senarai Pembeli (${buyers.length} orang)</div>
+              ${buyersHtml}
+              ${buyerFormHtml}
+            </div>
                 <div class="stat-num">${total}</div>
                 <div class="stat-label">Jumlah Slot</div>
               </div>
