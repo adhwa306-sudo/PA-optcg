@@ -116,13 +116,33 @@
     .item-top {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       margin-bottom: 8px;
     }
     .item-title {
       font-weight: 700;
       font-size: 1.08rem;
+    }
+    .item-price {
+      font-weight: 800;
+      font-size: 1rem;
+      color: #111827;
+      background: #f3f4f6;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+    .product-img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      margin: 8px 0 10px;
+      display: block;
+      background: #f9fafb;
     }
     .badge {
       padding: 4px 10px;
@@ -224,7 +244,7 @@
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="sub" id="roleDesc">Semua orang boleh tengok senarai pre-order, jumlah terjual, dan baki available secara live.</p>
+      <p class="sub" id="roleDesc">Semua orang boleh tengok senarai pre-order, harga, jumlah terjual, dan baki available secara live.</p>
 
       <div id="adminFormWrap" style="display:none;">
         <form id="preorderForm" class="form-grid">
@@ -237,8 +257,16 @@
             <input id="totalSlot" type="number" min="1" placeholder="Contoh: 15" required />
           </div>
           <div>
+            <label for="itemPrice">Harga Seunit (RM)</label>
+            <input id="itemPrice" type="number" min="0" step="0.01" placeholder="Contoh: 120.00" required />
+          </div>
+          <div>
             <label for="slotNote">Catatan Ringkas (Pilihan)</label>
             <input id="slotNote" type="text" placeholder="Contoh: Est sampai 25/11/2026" />
+          </div>
+          <div>
+            <label for="itemImage">Pautan Gambar Produk (Pilihan)</label>
+            <input id="itemImage" type="url" placeholder="https://... atau ./img/luffy.jpg" />
           </div>
           <div class="full">
             <button type="submit" class="btn-primary">+ Tambah Item Pre-Order Baharu</button>
@@ -254,7 +282,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = 'https://bqcyaqqmfbgnyhhsjjwi.supabase.co';
+    const SUPABASE_URL = 'https://bqcyaqqmfgbnyhhsjjwi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Vay2hyDEviMK6BkHoRmcHQ_D6ipokFc';
     const ADMIN_PIN = 'Adhwa95#1995';
 
@@ -270,7 +298,7 @@
     const adminFormWrap = document.getElementById('adminFormWrap');
 
     function initSupabase() {
-      if (SUPABASE_ANON_KEY.includes('TAMPAL_KUNCI')) {
+      if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('TAMPAL_KUNCI')) {
         listContainer.innerHTML = '<div class="card"><div class="msg-error">Sila tampal kunci SUPABASE_PUBLISHABLE_KEY anda pada baris SUPABASE_ANON_KEY dalam kod index.html.</div></div>';
         return false;
       }
@@ -282,14 +310,14 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Anda boleh tambah item, rekod pembeli, dan ubah slot. Data akan dikemas kini untuk semua orang.';
+        roleDesc.textContent = 'Anda boleh tambah item, tetapkan harga & gambar, rekod pembeli, dan ubah slot.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Semua orang boleh tengok senarai pre-order, jumlah terjual, dan baki available secara live.';
+        roleDesc.textContent = 'Semua orang boleh tengok senarai pre-order, harga, jumlah terjual, dan baki available secara live.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
@@ -334,6 +362,12 @@
       return (item.buyers || []).reduce((sum, b) => sum + (Number(b.qty) || 0), 0);
     }
 
+    function formatPrice(val) {
+      const num = Number(val);
+      if (isNaN(num) || num <= 0) return 'Harga Belum Ditetapkan';
+      return 'RM ' + num.toFixed(2);
+    }
+
     function renderItems() {
       if (!items.length) {
         listContainer.innerHTML = '<div class="card"><p class="sub" style="margin:0;">Belum ada item pre-order buat masa ini.</p></div>';
@@ -345,6 +379,10 @@
         const total = Math.max(1, Number(item.total) || 1);
         const available = Math.max(0, total - bought);
         const isSoldOut = available === 0;
+
+        const imgHtml = item.image_url
+          ? `<img src="${escapeAttr(item.image_url)}" alt="${escapeAttr(item.name)}" class="product-img" onerror="this.style.display='none'" />`
+          : '';
 
         const buyers = Array.isArray(item.buyers) ? item.buyers : [];
         const buyersHtml = buyers.length
@@ -366,8 +404,10 @@
 
         const adminActionsHtml = isAdmin ? `
           <div class="actions">
-            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, 1)">+1 Slot Stok</button>
-            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, -1)">-1 Slot Stok</button>
+            <button type="button" class="btn-slot" onclick="editPrice(${itemIdx})">Ubah Harga</button>
+            <button type="button" class="btn-slot" onclick="editImage(${itemIdx})">Ubah Gambar</button>
+            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, 1)">+1 Slot</button>
+            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, -1)">-1 Slot</button>
             <button type="button" class="btn-del" onclick="deleteItem(${itemIdx})">Padam Item</button>
           </div>
         ` : '';
@@ -375,9 +415,15 @@
         return `
           <div class="item-card ${isSoldOut ? 'sold-out' : ''}">
             <div class="item-top">
-              <div class="item-title">${escapeHtml(item.name)}</div>
+              <div>
+                <div class="item-title">${escapeHtml(item.name)}</div>
+                <div class="item-price">${escapeHtml(formatPrice(item.price))}</div>
+              </div>
               <span class="badge">${isSoldOut ? 'SOLD OUT' : available + ' AVAILABLE'}</span>
             </div>
+
+            ${imgHtml}
+
             ${item.note ? `<div class="sub" style="margin:0 0 8px;">${escapeHtml(item.note)}</div>` : ''}
 
             <div class="stats">
@@ -405,6 +451,54 @@
           </div>
         `;
       }).join('');
+    }
+
+    async function editPrice(itemIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      const item = items[itemIdx];
+      const input = prompt(`Masukkan harga baharu (RM) untuk "${item.name}":`, item.price || 0);
+      if (input === null) return;
+      const num = parseFloat(input);
+      if (isNaN(num) || num < 0) {
+        alert('Harga tidak sah.');
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('preorder_items')
+        .update({ price: num })
+        .eq('id', item.id)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Gagal kemas kini harga: ' + error.message);
+        return;
+      }
+      items[itemIdx] = data;
+      renderItems();
+    }
+
+    async function editImage(itemIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      const item = items[itemIdx];
+      const input = prompt(`Masukkan pautan (URL) gambar untuk "${item.name}" (kosongkan untuk buang gambar):`, item.image_url || '');
+      if (input === null) return;
+      const cleanUrl = input.trim();
+
+      const { data, error } = await supabaseClient
+        .from('preorder_items')
+        .update({ image_url: cleanUrl })
+        .eq('id', item.id)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Gagal kemas kini gambar: ' + error.message);
+        return;
+      }
+      items[itemIdx] = data;
+      renderItems();
     }
 
     async function addBuyer(e, itemIdx) {
@@ -498,20 +592,29 @@
       }[m]));
     }
 
+    function escapeAttr(str) {
+      return escapeHtml(str).replace(/`/g, '&#96;');
+    }
+
     document.getElementById('preorderForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!isAdmin || !supabaseClient) return;
 
       const name = document.getElementById('itemName').value.trim();
       const total = parseInt(document.getElementById('totalSlot').value, 10);
+      const price = parseFloat(document.getElementById('itemPrice').value);
       const note = document.getElementById('slotNote').value.trim();
+      const image_url = document.getElementById('itemImage').value.trim();
+
       if (!name || isNaN(total) || total < 1) return;
 
       const newItem = {
         id: 'item-' + Date.now(),
         name,
         total,
+        price: isNaN(price) || price < 0 ? 0 : price,
         note,
+        image_url,
         buyers: []
       };
 
