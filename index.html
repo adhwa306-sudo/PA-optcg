@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My First PWA</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111827" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f9fafb;
+      color: #111827;
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    h1 { font-size: 1.4rem; margin-top: 0; }
+    .row { display: flex; gap: 8px; margin-bottom: 16px; }
+    input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: #111827;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .del {
+      background: #ef4444;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Senarai Rekod PWA</h1>
+    <div class="row">
+      <input id="itemInput" type="text" placeholder="Masukkan item..." />
+      <button id="addBtn">Tambah</button>
+    </div>
+    <ul id="list"></ul>
+  </div>
+
+  <script>
+    const input = document.getElementById('itemInput');
+    const addBtn = document.getElementById('addBtn');
+    const list = document.getElementById('list');
+
+    let items = JSON.parse(localStorage.getItem('pwa_items') || '[]');
+
+    function render() {
+      list.innerHTML = '';
+      items.forEach((text, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${text}</span>
+          <button class="del" onclick="removeItem(${index})">Padam</button>
+        `;
+        list.appendChild(li);
+      });
+      localStorage.setItem('pwa_items', JSON.stringify(items));
+    }
+
+    function removeItem(index) {
+      items.splice(index, 1);
+      render();
+    }
+
+    addBtn.addEventListener('click', () => {
+      const val = input.value.trim();
+      if (!val) return;
+      items.push(val);
+      input.value = '';
+      render();
+    });
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addBtn.click();
+    });
+
+    render();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('Service Worker aktif'))
+          .catch((err) => console.error('Ralat SW:', err));
+      });
+    }
+  </script>
+</body>
+</html>
