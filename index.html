@@ -3,115 +3,369 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My First PWA</title>
-  <link rel="manifest" href="manifest.json" />
+  <title>Pre-Order TCG Tracker</title>
+  <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#111827" />
   <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #f9fafb;
-      color: #111827;
       margin: 0;
-      padding: 24px;
-      display: flex;
-      justify-content: center;
+      background: #f4f5f7;
+      color: #111827;
+      padding: 20px;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
     }
     .card {
-      width: 100%;
-      max-width: 420px;
       background: #ffffff;
       border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      margin-bottom: 16px;
     }
-    h1 { font-size: 1.4rem; margin-top: 0; }
-    .row { display: flex; gap: 8px; margin-bottom: 16px; }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+    }
+    .sub {
+      margin: 0 0 18px;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full {
+      grid-column: 1 / -1;
+    }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #374151;
+    }
     input {
-      flex: 1;
+      width: 100%;
       padding: 10px 12px;
       border: 1px solid #d1d5db;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
     button {
-      padding: 10px 16px;
       border: none;
       border-radius: 8px;
-      background: #111827;
-      color: #fff;
+      padding: 9px 13px;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
     }
-    ul { list-style: none; padding: 0; margin: 0; }
-    li {
+    .btn-primary {
+      background: #111827;
+      color: #ffffff;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .item-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 14px;
+      border-left: 5px solid #16a34a;
+    }
+    .item-card.sold-out {
+      border-left-color: #dc2626;
+    }
+    .item-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 12px;
-      border-bottom: 1px solid #f3f4f6;
+      gap: 10px;
+      margin-bottom: 8px;
     }
-    .del {
-      background: #ef4444;
-      padding: 6px 10px;
-      font-size: 0.8rem;
+    .item-title {
+      font-weight: 700;
+      font-size: 1.08rem;
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #dcfce7;
+      color: #166534;
+      white-space: nowrap;
+    }
+    .sold-out .badge {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: #f9fafb;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0 12px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+    .buyers-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .buyers-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1f2937;
+    }
+    .buyer-list {
+      margin: 0 0 10px;
+      padding-left: 20px;
+      font-size: 0.9rem;
+    }
+    .buyer-list li {
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-mini-del {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+    }
+    .buyer-form {
+      display: grid;
+      grid-template-columns: 1fr 95px auto;
+      gap: 8px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn-slot { background: #e5e7eb; color: #111827; }
+    .btn-del { background: #fee2e2; color: #991b1b; margin-left: auto; }
+    @media (max-width: 540px) {
+      .form-grid, .buyer-form { grid-template-columns: 1fr; }
+      .btn-del { margin-left: 0; }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Senarai Rekod PWA</h1>
-    <div class="row">
-      <input id="itemInput" type="text" placeholder="Masukkan item..." />
-      <button id="addBtn">Tambah</button>
+  <div class="container">
+    <div class="card">
+      <h1>Pre-Order Kad TCG</h1>
+      <p class="sub">Senarai item pre-order, nama pembeli, jumlah pcs terjual, dan baki stok available.</p>
+
+      <form id="preorderForm" class="form-grid">
+        <div class="full">
+          <label for="itemName">Nama Item / Set Kad</label>
+          <input id="itemName" type="text" placeholder="Contoh: Luffy gear 5 promo" required />
+        </div>
+        <div>
+          <label for="totalSlot">Jumlah Slot / Stok</label>
+          <input id="totalSlot" type="number" min="1" placeholder="Contoh: 15" required />
+        </div>
+        <div>
+          <label for="slotNote">Catatan Ringkas (Pilihan)</label>
+          <input id="slotNote" type="text" placeholder="Contoh: Batch 1 / Deposit" />
+        </div>
+        <div class="full">
+          <button type="submit" class="btn-primary">+ Tambah Item Pre-Order Baharu</button>
+        </div>
+      </form>
     </div>
-    <ul id="list"></ul>
+
+    <div id="listContainer"></div>
   </div>
 
   <script>
-    const input = document.getElementById('itemInput');
-    const addBtn = document.getElementById('addBtn');
-    const list = document.getElementById('list');
+    const STORAGE_KEY = 'tcg_preorder_buyers_v1';
 
-    let items = JSON.parse(localStorage.getItem('pwa_items') || '[]');
+    const defaultItems = [
+      {
+        name: 'Luffy unseal promo 1st annversary',
+        total: 10,
+        note: 'Pre-Order Slot',
+        buyers: [
+          { name: '@Syuib', qty: 1 }
+        ]
+      },
+      {
+        name: 'Luffy king 2nd annversary',
+        total: 20,
+        note: 'Pre-Order Slot',
+        buyers: [
+          { name: '@Nik Dhil', qty: 1 },
+          { name: '@dpopeyegym', qty: 1 },
+          { name: '@MoFar Faris', qty: 1 },
+          { name: '@khairul izzat', qty: 1 },
+          { name: 'Adhwa', qty: 1 },
+          { name: 'Zul nakama', qty: 1 },
+          { name: '@JG Sarawak', qty: 2 },
+          { name: '@Bal Azid Iqbal', qty: 1 },
+          { name: '@Yogeshwaran', qty: 2 }
+        ]
+      }
+    ];
 
-    function render() {
-      list.innerHTML = '';
-      items.forEach((text, index) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span>${text}</span>
-          <button class="del" onclick="removeItem(${index})">Padam</button>
+    let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (!Array.isArray(items)) {
+      items = defaultItems;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    const form = document.getElementById('preorderForm');
+    const listContainer = document.getElementById('listContainer');
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      renderItems();
+    }
+
+    function getBoughtQty(item) {
+      return (item.buyers || []).reduce((sum, b) => sum + (Number(b.qty) || 0), 0);
+    }
+
+    function renderItems() {
+      if (!items.length) {
+        listContainer.innerHTML = '<div class="card"><p class="sub" style="margin:0;">Belum ada item pre-order. Tambah item di atas.</p></div>';
+        return;
+      }
+
+      listContainer.innerHTML = items.map((item, itemIdx) => {
+        const bought = getBoughtQty(item);
+        const total = Math.max(1, Number(item.total) || 1);
+        const available = Math.max(0, total - bought);
+        const isSoldOut = available === 0;
+
+        const buyersHtml = (item.buyers || []).length
+          ? `<ol class="buyer-list">` + item.buyers.map((b, bIdx) => `
+              <li>
+                <span><strong>${escapeHtml(b.name)}</strong> — ${Number(b.qty)}pcs</span>
+                <button type="button" class="btn-mini-del" onclick="removeBuyer(${itemIdx}, ${bIdx})">Buang</button>
+              </li>
+            `).join('') + `</ol>`
+          : `<p class="sub" style="margin:0 0 10px;">Belum ada pembeli direkodkan.</p>`;
+
+        return `
+          <div class="item-card ${isSoldOut ? 'sold-out' : ''}">
+            <div class="item-top">
+              <div class="item-title">${escapeHtml(item.name)}</div>
+              <span class="badge">${isSoldOut ? 'SOLD OUT' : available + ' AVAILABLE'}</span>
+            </div>
+            ${item.note ? `<div class="sub" style="margin:0 0 8px;">${escapeHtml(item.note)}</div>` : ''}
+
+            <div class="stats">
+              <div>
+                <div class="stat-num">${total}</div>
+                <div class="stat-label">Jumlah Slot</div>
+              </div>
+              <div>
+                <div class="stat-num">${bought} pcs</div>
+                <div class="stat-label">Sudah Beli</div>
+              </div>
+              <div>
+                <div class="stat-num">${available} pcs</div>
+                <div class="stat-label">Masih Available</div>
+              </div>
+            </div>
+
+            <div class="buyers-box">
+              <div class="buyers-title">Senarai Pembeli (${(item.buyers || []).length} orang)</div>
+              ${buyersHtml}
+              <form class="buyer-form" onsubmit="addBuyer(event, ${itemIdx})">
+                <input type="text" id="buyerName-${itemIdx}" placeholder="Nama pembeli (cth: @Ali)" required />
+                <input type="number" id="buyerQty-${itemIdx}" min="1" value="1" required />
+                <button type="submit" class="btn-slot">+ Tambah</button>
+              </form>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, 1)">+1 Slot Stok</button>
+              <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, -1)">-1 Slot Stok</button>
+              <button type="button" class="btn-del" onclick="deleteItem(${itemIdx})">Padam Item</button>
+            </div>
+          </div>
         `;
-        list.appendChild(li);
-      });
-      localStorage.setItem('pwa_items', JSON.stringify(items));
+      }).join('');
     }
 
-    function removeItem(index) {
-      items.splice(index, 1);
-      render();
+    function addBuyer(e, itemIdx) {
+      e.preventDefault();
+      const nameInput = document.getElementById(`buyerName-${itemIdx}`);
+      const qtyInput = document.getElementById(`buyerQty-${itemIdx}`);
+      const name = nameInput.value.trim();
+      const qty = parseInt(qtyInput.value, 10);
+
+      if (!name || isNaN(qty) || qty < 1) return;
+      items[itemIdx].buyers.push({ name, qty });
+      saveItems();
     }
 
-    addBtn.addEventListener('click', () => {
-      const val = input.value.trim();
-      if (!val) return;
-      items.push(val);
-      input.value = '';
-      render();
+    function removeBuyer(itemIdx, buyerIdx) {
+      items[itemIdx].buyers.splice(buyerIdx, 1);
+      saveItems();
+    }
+
+    function changeTotal(itemIdx, delta) {
+      const bought = getBoughtQty(items[itemIdx]);
+      const nextTotal = Number(items[itemIdx].total) + delta;
+      if (nextTotal < Math.max(1, bought)) return;
+      items[itemIdx].total = nextTotal;
+      saveItems();
+    }
+
+    function deleteItem(itemIdx) {
+      items.splice(itemIdx, 1);
+      saveItems();
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('itemName').value.trim();
+      const total = parseInt(document.getElementById('totalSlot').value, 10);
+      const note = document.getElementById('slotNote').value.trim();
+
+      if (!name || isNaN(total) || total < 1) return;
+      items.unshift({ name, total, note, buyers: [] });
+      saveItems();
+      form.reset();
     });
 
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') addBtn.click();
-    });
-
-    render();
+    renderItems();
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Service Worker aktif'))
-          .catch((err) => console.error('Ralat SW:', err));
-      });
+      navigator.serviceWorker.register('./sw.js');
     }
   </script>
 </body>
