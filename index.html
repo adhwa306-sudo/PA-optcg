@@ -111,7 +111,17 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .sub-filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
       margin-bottom: 16px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid #1e293b;
+      border-radius: 12px;
     }
     .filter-btn {
       background: #161d2b;
@@ -127,6 +137,21 @@
       background: #ffffff;
       color: #111827;
       border-color: #ffffff;
+    }
+    .sub-filter-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sub-filter-btn.active {
+      background: #f59e0b;
+      color: #111827;
+      border-color: #f59e0b;
     }
     .form-grid {
       display: grid;
@@ -269,6 +294,18 @@
     .cat-badge.single {
       background: #ffedd5;
       color: #9a3412;
+    }
+    .cat-badge.onepiece {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .cat-badge.marvel {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .cat-badge.pokemon {
+      background: #fef3c7;
+      color: #92400e;
     }
     .badge {
       padding: 3px 8px;
@@ -506,7 +543,7 @@
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock &amp; Single Card/Slab — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.</p>
+      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock &amp; Single Card/Slab (One Piece, Marvel &amp; Pokémon) — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.</p>
     </div>
 
     <div id="adminFormWrap" class="card" style="display:none;">
@@ -519,7 +556,9 @@
           <select id="itemCategory" required>
             <option value="Pre-Order">Pre-Order</option>
             <option value="Ready Stock">Ready Stock</option>
-            <option value="Single Card">Single Card</option>
+            <option value="Single Card - One Piece">Single Card — One Piece</option>
+            <option value="Single Card - Marvel">Single Card — Marvel</option>
+            <option value="Single Card - Pokemon">Single Card — Pokémon</option>
           </select>
         </div>
         <div>
@@ -621,6 +660,13 @@
       <button type="button" class="filter-btn" data-cat="Single Card" onclick="setCategoryFilter('Single Card')">Single Card</button>
     </div>
 
+    <div id="singleSubFilterBar" class="sub-filter-bar" style="display:none;">
+      <button type="button" class="sub-filter-btn active" data-subcat="ALL" onclick="setSingleSubFilter('ALL')">Semua Single</button>
+      <button type="button" class="sub-filter-btn" data-subcat="One Piece" onclick="setSingleSubFilter('One Piece')">1. One Piece</button>
+      <button type="button" class="sub-filter-btn" data-subcat="Marvel" onclick="setSingleSubFilter('Marvel')">2. Marvel</button>
+      <button type="button" class="sub-filter-btn" data-subcat="Pokemon" onclick="setSingleSubFilter('Pokemon')">3. Pokémon</button>
+    </div>
+
     <div id="listContainer">
       <div class="card"><p class="sub" style="margin:0;">Sedang memuatkan data...</p></div>
     </div>
@@ -634,10 +680,18 @@
     const ADMIN_PIN = 'Adhwa95#1995';
     const WHATSAPP_NUMBER = '60129456492';
 
+    const CATEGORY_CYCLE = [
+      'Pre-Order',
+      'Ready Stock',
+      'Single Card - One Piece',
+      'Single Card - Marvel',
+      'Single Card - Pokemon'
+    ];
+
     const ADMIN_SESSION_KEY = 'pa_optcg_admin_unlocked';
     let isAdmin = sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
     let activeCategory = 'ALL';
-    let activeOrderFilter = 'ALL';
+    let activeSingleSub = 'ALL';
     let items = [];
     let buyerOrders = [];
     let supabaseClient = null;
@@ -649,6 +703,7 @@
     const adminBtn = document.getElementById('adminBtn');
     const adminFormWrap = document.getElementById('adminFormWrap');
     const adminOrdersWrap = document.getElementById('adminOrdersWrap');
+    const singleSubFilterBar = document.getElementById('singleSubFilterBar');
     const orderItemSelect = document.getElementById('orderItemSelect');
     const ordersTableContainer = document.getElementById('ordersTableContainer');
     const ordersSummary = document.getElementById('ordersSummary');
@@ -657,14 +712,41 @@
     const editImageFileInput = document.getElementById('editImageFileInput');
 
     function normalizeCategory(cat) {
-      if (cat === 'Ready Stock') return 'Ready Stock';
-      if (cat === 'Single Card') return 'Single Card';
+      const val = String(cat || '').trim();
+      if (val === 'Ready Stock') return 'Ready Stock';
+      if (val === 'Single Card - One Piece') return 'Single Card - One Piece';
+      if (val === 'Single Card - Marvel') return 'Single Card - Marvel';
+      if (val === 'Single Card - Pokemon' || val === 'Single Card - Pokémon') return 'Single Card - Pokemon';
+      if (val === 'Single Card') return 'Single Card - One Piece';
       return 'Pre-Order';
     }
 
+    function isSingleCardCategory(cat) {
+      return normalizeCategory(cat).startsWith('Single Card');
+    }
+
+    function getSingleSubCategory(cat) {
+      const norm = normalizeCategory(cat);
+      if (norm === 'Single Card - One Piece') return 'One Piece';
+      if (norm === 'Single Card - Marvel') return 'Marvel';
+      if (norm === 'Single Card - Pokemon') return 'Pokemon';
+      return '';
+    }
+
+    function formatCategoryDisplay(cat) {
+      const norm = normalizeCategory(cat);
+      if (norm === 'Single Card - Pokemon') return 'Single • Pokémon';
+      if (norm === 'Single Card - One Piece') return 'Single • One Piece';
+      if (norm === 'Single Card - Marvel') return 'Single • Marvel';
+      return norm;
+    }
+
     function getCategoryBadgeClass(cat) {
-      if (cat === 'Ready Stock') return 'cat-badge ready';
-      if (cat === 'Single Card') return 'cat-badge single';
+      const norm = normalizeCategory(cat);
+      if (norm === 'Ready Stock') return 'cat-badge ready';
+      if (norm === 'Single Card - One Piece') return 'cat-badge onepiece';
+      if (norm === 'Single Card - Marvel') return 'cat-badge marvel';
+      if (norm === 'Single Card - Pokemon') return 'cat-badge pokemon';
       return 'cat-badge';
     }
 
@@ -705,7 +787,7 @@
       if (!orderItemSelect) return;
       const options = items.map(it => {
         const cat = normalizeCategory(it.category);
-        return `<option value="${escapeAttr(it.id)}" data-name="${escapeAttr(it.name)}" data-cat="${escapeAttr(cat)}">${escapeHtml(it.name)} [${escapeHtml(cat)}]</option>`;
+        return `<option value="${escapeAttr(it.id)}" data-name="${escapeAttr(it.name)}" data-cat="${escapeAttr(cat)}">${escapeHtml(it.name)} [${escapeHtml(formatCategoryDisplay(cat))}]</option>`;
       });
       options.push(`<option value="" data-name="Item Manual" data-cat="Pre-Order">Lain-lain / Item Manual</option>`);
       orderItemSelect.innerHTML = options.join('');
@@ -715,7 +797,7 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item Pre-Order, Ready Stock & Single Card, rekod detail pembeli, dan laraskan slot.';
+        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item Pre-Order, Ready Stock & Single Card (One Piece, Marvel, Pokémon), serta rekod pembeli.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
@@ -725,7 +807,7 @@
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock & Single Card/Slab — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.';
+        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock & Single Card/Slab (One Piece, Marvel & Pokémon) — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
@@ -738,6 +820,23 @@
       activeCategory = cat;
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.cat === cat);
+      });
+      if (cat === 'Single Card') {
+        singleSubFilterBar.style.display = 'flex';
+      } else {
+        singleSubFilterBar.style.display = 'none';
+        activeSingleSub = 'ALL';
+        document.querySelectorAll('.sub-filter-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.subcat === 'ALL');
+        });
+      }
+      renderItems();
+    }
+
+    function setSingleSubFilter(subCat) {
+      activeSingleSub = subCat;
+      document.querySelectorAll('.sub-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.subcat === subCat);
       });
       renderItems();
     }
@@ -836,7 +935,7 @@
             </td>
             <td>
               <strong>${escapeHtml(order.item_name)}</strong> (${Number(order.qty || 1)} pcs)<br/>
-              <span class="${getCategoryBadgeClass(cat)}" style="margin-top:4px; display:inline-block;">${escapeHtml(cat)}</span>
+              <span class="${getCategoryBadgeClass(cat)}" style="margin-top:4px; display:inline-block;">${escapeHtml(formatCategoryDisplay(cat))}</span>
             </td>
             <td style="max-width:210px; white-space:pre-line; color:#374151;">${escapeHtml(order.address || '-')}</td>
             <td>
@@ -986,12 +1085,12 @@
 
     function getWhatsAppOrderUrl(item, available) {
       const cleanPhone = WHATSAPP_NUMBER.replace(/\D/g, '');
-      const cat = normalizeCategory(item.category);
+      const catLabel = formatCategoryDisplay(item.category);
       const priceText = formatPrice(item.price);
       const noteLine = item.note ? `\n• Catatan: ${item.note}` : '';
       const message =
-        `Hi PNK vaultTCG, saya berminat nak order item (${cat}) ini:\n` +
-        `• Kategori: ${cat}\n` +
+        `Hi PNK vaultTCG, saya berminat nak order item (${catLabel}) ini:\n` +
+        `• Kategori: ${catLabel}\n` +
         `• Item: ${item.name}\n` +
         `• Harga: ${priceText}\n` +
         `• Baki slot/stok available: ${available} pcs` +
@@ -1002,13 +1101,13 @@
     function copyPromoText(itemId) {
       const item = items.find(x => x.id === itemId);
       if (!item) return;
-      const cat = normalizeCategory(item.category);
+      const catLabel = formatCategoryDisplay(item.category);
       const bought = getBoughtQty(item);
       const total = Math.max(1, Number(item.total) || 1);
       const available = Math.max(0, total - bought);
       const text =
-        `PNK vaultTCG — ${cat.toUpperCase()} OPEN!\n` +
-        `• Kategori: ${cat}\n` +
+        `PNK vaultTCG — ${catLabel.toUpperCase()}!\n` +
+        `• Kategori: ${catLabel}\n` +
         `• Item: ${item.name}\n` +
         `• Harga: ${formatPrice(item.price)}\n` +
         `• Available: ${available} / ${total} pcs` +
@@ -1023,12 +1122,22 @@
     }
 
     function renderItems() {
-      const filtered = activeCategory === 'ALL'
-        ? items
-        : items.filter(it => normalizeCategory(it.category) === activeCategory);
+      const filtered = items.filter(it => {
+        const norm = normalizeCategory(it.category);
+        if (activeCategory === 'ALL') return true;
+        if (activeCategory === 'Single Card') {
+          if (!isSingleCardCategory(norm)) return false;
+          if (activeSingleSub === 'ALL') return true;
+          return getSingleSubCategory(norm) === activeSingleSub;
+        }
+        return norm === activeCategory;
+      });
 
       if (!filtered.length) {
-        listContainer.innerHTML = `<div class="card"><p class="sub" style="margin:0;">Tiada item dalam kategori "${escapeHtml(activeCategory)}" buat masa ini.</p></div>`;
+        const emptyLabel = activeCategory === 'Single Card' && activeSingleSub !== 'ALL'
+          ? `Single Card (${activeSingleSub})`
+          : activeCategory;
+        listContainer.innerHTML = `<div class="card"><p class="sub" style="margin:0;">Tiada item dalam kategori "${escapeHtml(emptyLabel)}" buat masa ini.</p></div>`;
         return;
       }
 
@@ -1086,7 +1195,7 @@
             <div>
               ${imgHtml}
               <div class="badge-row">
-                <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(cat)}</span>
+                <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(formatCategoryDisplay(cat))}</span>
                 ${showNewBadge ? `<span class="badge-new">NEW</span>` : ''}
                 <span class="badge">${isSoldOut ? 'SOLD OUT' : available + ' AVAIL'}</span>
               </div>
@@ -1187,11 +1296,8 @@
       if (!isAdmin || !supabaseClient) return;
       const item = items[itemIdx];
       const currCat = normalizeCategory(item.category);
-      const nextCat = currCat === 'Pre-Order'
-        ? 'Ready Stock'
-        : currCat === 'Ready Stock'
-          ? 'Single Card'
-          : 'Pre-Order';
+      const currIndex = CATEGORY_CYCLE.indexOf(currCat);
+      const nextCat = CATEGORY_CYCLE[(currIndex + 1) % CATEGORY_CYCLE.length];
 
       const { data, error } = await supabaseClient
         .from('preorder_items')
