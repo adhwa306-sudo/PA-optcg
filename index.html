@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pre-Order & Ready Stock Kad TCG</title>
+  <title>PA-optcg vault</title>
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#111827" />
   <style>
@@ -90,6 +90,12 @@
       margin-bottom: 5px;
       color: #374151;
     }
+    .hint {
+      display: block;
+      font-size: 0.74rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
     input, select {
       width: 100%;
       padding: 9px 11px;
@@ -98,6 +104,10 @@
       font-size: 0.92rem;
       background: #ffffff;
     }
+    input[type="file"] {
+      padding: 7px 9px;
+      font-size: 0.84rem;
+    }
     button {
       border: none;
       border-radius: 8px;
@@ -105,6 +115,10 @@
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
     .btn-primary {
       background: #111827;
@@ -368,13 +382,19 @@
             <input id="slotNote" type="text" placeholder="Contoh: Est sampai 25/11/2026" />
           </div>
           <div>
-            <label for="itemImage">Pautan Gambar Produk (Pilihan)</label>
-            <input id="itemImage" type="text" placeholder="https://... atau ./images/luffy.jpg" />
+            <label for="itemImage">Link Gambar (Pilihan)</label>
+            <input id="itemImage" type="text" placeholder="https://... (jika tak upload fail)" />
           </div>
           <div class="full">
-            <button type="submit" class="btn-primary">+ Tambah Item Baharu</button>
+            <label for="itemImageFile">Atau Upload Gambar Dari Telefon / Komputer (Pilihan)</label>
+            <input id="itemImageFile" type="file" accept="image/*" />
+            <span class="hint">Jika fail dipilih, gambar akan dimuat naik automatik ke Supabase Storage dan mengatasi Link Gambar di atas.</span>
+          </div>
+          <div class="full">
+            <button type="submit" id="submitItemBtn" class="btn-primary">+ Tambah Item Baharu</button>
           </div>
         </form>
+        <input id="editImageFileInput" type="file" accept="image/*" style="display:none;" />
       </div>
     </div>
 
@@ -393,6 +413,7 @@
   <script>
     const SUPABASE_URL = 'https://bqcyaqqmfbgnyhhsjjwi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Vay2hyDEviMK6BkHoRmcHQ_D6ipokFc';
+    const STORAGE_BUCKET = 'product-images';
     const ADMIN_PIN = 'Adhwa95#1995';
     const WHATSAPP_NUMBER = '60129456492';
 
@@ -401,12 +422,15 @@
     let activeCategory = 'ALL';
     let items = [];
     let supabaseClient = null;
+    let pendingEditImageIdx = null;
 
     const listContainer = document.getElementById('listContainer');
     const roleBadge = document.getElementById('roleBadge');
     const roleDesc = document.getElementById('roleDesc');
     const adminBtn = document.getElementById('adminBtn');
     const adminFormWrap = document.getElementById('adminFormWrap');
+    const submitItemBtn = document.getElementById('submitItemBtn');
+    const editImageFileInput = document.getElementById('editImageFileInput');
 
     function initSupabase() {
       if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('TAMPAL_KUNCI')) {
@@ -417,11 +441,35 @@
       return true;
     }
 
+    async function uploadImageToStorage(file) {
+      if (!file || !supabaseClient) return '';
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const ext = rawExt || 'jpg';
+      const filePath = `items/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, file, {
+          contentType: file.type || `image/${ext}`,
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error('Gagal upload gambar ke Storage: ' + uploadError.message);
+      }
+
+      const { data: publicData } = supabaseClient.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(filePath);
+
+      return publicData?.publicUrl || '';
+    }
+
     function updateAdminUI() {
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Anda boleh tambah item Pre-Order / Ready Stock, kemas kini harga & gambar, rekod pembeli, dan ubah slot.';
+        roleDesc.textContent = 'Anda boleh tambah item Pre-Order / Ready Stock, upload atau tukar gambar, rekod pembeli, dan ubah slot.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
@@ -586,7 +634,8 @@
             <button type="button" class="btn-slot" onclick="toggleCategory(${itemIdx})">Tukar Kat.</button>
             <button type="button" class="btn-copy" onclick="copyPromoText('${escapeAttr(item.id)}')">Copy</button>
             <button type="button" class="btn-slot" onclick="editPrice(${itemIdx})">Harga</button>
-            <button type="button" class="btn-slot" onclick="editImage(${itemIdx})">Gambar</button>
+            <button type="button" class="btn-slot" onclick="uploadImageForItem(${itemIdx})">Upload Gbr</button>
+            <button type="button" class="btn-slot" onclick="editImageUrl(${itemIdx})">Link Gbr</button>
             <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, 1)">+1</button>
             <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, -1)">-1</button>
             <button type="button" class="btn-del" onclick="deleteItem(${itemIdx})">Padam</button>
@@ -638,6 +687,63 @@
       }).join('') + `</div>`;
     }
 
+    function uploadImageForItem(itemIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      pendingEditImageIdx = itemIdx;
+      editImageFileInput.value = '';
+      editImageFileInput.click();
+    }
+
+    editImageFileInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      const itemIdx = pendingEditImageIdx;
+      pendingEditImageIdx = null;
+      if (!file || itemIdx === null || !isAdmin || !supabaseClient) return;
+
+      const item = items[itemIdx];
+      try {
+        const publicUrl = await uploadImageToStorage(file);
+        const { data, error } = await supabaseClient
+          .from('preorder_items')
+          .update({ image_url: publicUrl })
+          .eq('id', item.id)
+          .select()
+          .single();
+
+        if (error) {
+          alert('Gagal simpan link gambar ke database: ' + error.message);
+          return;
+        }
+        items[itemIdx] = data;
+        renderItems();
+        alert('Gambar berjaya di-upload!');
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    async function editImageUrl(itemIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      const item = items[itemIdx];
+      const input = prompt(`Masukkan link URL gambar untuk "${item.name}" (atau kosongkan untuk buang):`, item.image_url || '');
+      if (input === null) return;
+      const cleanUrl = input.trim();
+
+      const { data, error } = await supabaseClient
+        .from('preorder_items')
+        .update({ image_url: cleanUrl })
+        .eq('id', item.id)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Gagal kemas kini gambar: ' + error.message);
+        return;
+      }
+      items[itemIdx] = data;
+      renderItems();
+    }
+
     async function toggleCategory(itemIdx) {
       if (!isAdmin || !supabaseClient) return;
       const item = items[itemIdx];
@@ -678,28 +784,6 @@
 
       if (error) {
         alert('Gagal kemas kini harga: ' + error.message);
-        return;
-      }
-      items[itemIdx] = data;
-      renderItems();
-    }
-
-    async function editImage(itemIdx) {
-      if (!isAdmin || !supabaseClient) return;
-      const item = items[itemIdx];
-      const input = prompt(`Masukkan pautan gambar untuk "${item.name}":`, item.image_url || '');
-      if (input === null) return;
-      const cleanUrl = input.trim();
-
-      const { data, error } = await supabaseClient
-        .from('preorder_items')
-        .update({ image_url: cleanUrl })
-        .eq('id', item.id)
-        .select()
-        .single();
-
-      if (error) {
-        alert('Gagal kemas kini gambar: ' + error.message);
         return;
       }
       items[itemIdx] = data;
@@ -810,34 +894,51 @@
       const total = parseInt(document.getElementById('totalSlot').value, 10);
       const price = parseFloat(document.getElementById('itemPrice').value);
       const note = document.getElementById('slotNote').value.trim();
-      const image_url = document.getElementById('itemImage').value.trim();
+      const typedUrl = document.getElementById('itemImage').value.trim();
+      const fileInput = document.getElementById('itemImageFile');
+      const selectedFile = fileInput.files && fileInput.files[0];
 
       if (!name || isNaN(total) || total < 1) return;
 
-      const newItem = {
-        id: 'item-' + Date.now(),
-        category,
-        name,
-        total,
-        price: isNaN(price) || price < 0 ? 0 : price,
-        note,
-        image_url,
-        buyers: []
-      };
+      submitItemBtn.disabled = true;
+      submitItemBtn.textContent = 'Sedang menyimpan...';
 
-      const { data, error } = await supabaseClient
-        .from('preorder_items')
-        .insert([newItem])
-        .select()
-        .single();
+      try {
+        let finalImageUrl = typedUrl;
+        if (selectedFile) {
+          finalImageUrl = await uploadImageToStorage(selectedFile);
+        }
 
-      if (error) {
-        alert('Gagal tambah item: ' + error.message);
-        return;
+        const newItem = {
+          id: 'item-' + Date.now(),
+          category,
+          name,
+          total,
+          price: isNaN(price) || price < 0 ? 0 : price,
+          note,
+          image_url: finalImageUrl,
+          buyers: []
+        };
+
+        const { data, error } = await supabaseClient
+          .from('preorder_items')
+          .insert([newItem])
+          .select()
+          .single();
+
+        if (error) {
+          alert('Gagal tambah item: ' + error.message);
+          return;
+        }
+        items.unshift(data);
+        e.target.reset();
+        renderItems();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        submitItemBtn.disabled = false;
+        submitItemBtn.textContent = '+ Tambah Item Baharu';
       }
-      items.unshift(data);
-      e.target.reset();
-      renderItems();
     });
 
     updateAdminUI();
