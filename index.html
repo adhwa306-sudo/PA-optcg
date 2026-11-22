@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#0b0f17" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
     body {
@@ -21,37 +21,68 @@
       max-width: 1080px;
       margin: 0 auto;
     }
+    .hero-card {
+      background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+      color: #f9fafb;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      border-top: 3px solid #f59e0b;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+      margin-bottom: 16px;
+    }
     .card {
       background: #ffffff;
       color: #111827;
       border-radius: 14px;
-      padding: 20px;
+      padding: 18px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
       margin-bottom: 16px;
     }
     .top-bar {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .brand-title {
       margin: 0;
-      font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
-      font-size: 2.15rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
+      font-family: 'Syne', 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
       line-height: 1.05;
-      color: #0f172a;
+      color: #ffffff;
+    }
+    .brand-title span {
+      color: #f59e0b;
+    }
+    .hero-sub {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      max-width: 700px;
+    }
+    .hero-card .status-pill {
+      background: rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+    }
+    .hero-card .status-pill.admin {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .hero-card .btn-admin {
+      background: #f59e0b;
+      color: #111827;
+      font-weight: 700;
     }
     .sub {
       margin: 0 0 14px;
-      color: #4b5563;
-      font-size: 0.92rem;
-      line-height: 1.45;
-      max-width: 720px;
+      color: #6b7280;
+      font-size: 0.88rem;
     }
     .status-pill {
       font-size: 0.78rem;
@@ -353,7 +384,8 @@
     }
     @media (max-width: 540px) {
       body { padding: 10px; }
-      .brand-title { font-size: 1.7rem; }
+      .hero-card { padding: 16px; }
+      .brand-title { font-size: 1.75rem; }
       .grid-list { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .item-card { padding: 9px; }
       .form-grid { grid-template-columns: 1fr; }
@@ -363,56 +395,56 @@
 </head>
 <body>
   <div class="container">
-    <div class="card">
+    <div class="hero-card">
       <div class="top-bar">
-        <h1 class="brand-title">PNK vaultTCG</h1>
+        <h1 class="brand-title">PNK vault<span>TCG</span></h1>
         <div style="display:flex; gap:8px; align-items:center;">
           <span id="roleBadge" class="status-pill">Mod Lihat Sahaja</span>
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="sub" id="roleDesc">Katalog rasmi Pre-Order &amp; Ready Stock — semak ketersediaan slot, harga terkini, dan buat tempahan terus melalui WhatsApp.</p>
+      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order &amp; Ready Stock kad koleksi — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.</p>
+    </div>
 
-      <div id="adminFormWrap" style="display:none;">
-        <form id="preorderForm" class="form-grid">
-          <div>
-            <label for="itemCategory">Kategori</label>
-            <select id="itemCategory" required>
-              <option value="Pre-Order">Pre-Order</option>
-              <option value="Ready Stock">Ready Stock</option>
-            </select>
-          </div>
-          <div>
-            <label for="itemName">Nama Item / Set Kad</label>
-            <input id="itemName" type="text" placeholder="Contoh: Luffy Gear 5 Promo" required />
-          </div>
-          <div>
-            <label for="totalSlot">Jumlah Slot / Stok</label>
-            <input id="totalSlot" type="number" min="1" placeholder="Contoh: 15" required />
-          </div>
-          <div>
-            <label for="itemPrice">Harga Seunit (RM)</label>
-            <input id="itemPrice" type="number" min="0" step="0.01" placeholder="Contoh: 120.00" required />
-          </div>
-          <div>
-            <label for="slotNote">Catatan Ringkas (Pilihan)</label>
-            <input id="slotNote" type="text" placeholder="Contoh: Est sampai 25/11/2026" />
-          </div>
-          <div>
-            <label for="itemImage">Link Gambar (Pilihan)</label>
-            <input id="itemImage" type="text" placeholder="https://... (jika tak upload fail)" />
-          </div>
-          <div class="full">
-            <label for="itemImageFile">Atau Upload Gambar Dari Telefon / Komputer (Pilihan)</label>
-            <input id="itemImageFile" type="file" accept="image/*" />
-            <span class="hint">Jika fail dipilih, gambar akan dimuat naik automatik ke Supabase Storage dan mengatasi Link Gambar di atas.</span>
-          </div>
-          <div class="full">
-            <button type="submit" id="submitItemBtn" class="btn-primary">+ Tambah Item Baharu</button>
-          </div>
-        </form>
-        <input id="editImageFileInput" type="file" accept="image/*" style="display:none;" />
-      </div>
+    <div id="adminFormWrap" class="card" style="display:none;">
+      <form id="preorderForm" class="form-grid">
+        <div>
+          <label for="itemCategory">Kategori</label>
+          <select id="itemCategory" required>
+            <option value="Pre-Order">Pre-Order</option>
+            <option value="Ready Stock">Ready Stock</option>
+          </select>
+        </div>
+        <div>
+          <label for="itemName">Nama Item / Set Kad</label>
+          <input id="itemName" type="text" placeholder="Contoh: Luffy Gear 5 Promo" required />
+        </div>
+        <div>
+          <label for="totalSlot">Jumlah Slot / Stok</label>
+          <input id="totalSlot" type="number" min="1" placeholder="Contoh: 15" required />
+        </div>
+        <div>
+          <label for="itemPrice">Harga Seunit (RM)</label>
+          <input id="itemPrice" type="number" min="0" step="0.01" placeholder="Contoh: 120.00" required />
+        </div>
+        <div>
+          <label for="slotNote">Catatan Ringkas (Pilihan)</label>
+          <input id="slotNote" type="text" placeholder="Contoh: Est sampai 25/11/2026" />
+        </div>
+        <div>
+          <label for="itemImage">Link Gambar (Pilihan)</label>
+          <input id="itemImage" type="text" placeholder="https://... (jika tak upload fail)" />
+        </div>
+        <div class="full">
+          <label for="itemImageFile">Atau Upload Gambar Dari Telefon / Komputer (Pilihan)</label>
+          <input id="itemImageFile" type="file" accept="image/*" />
+          <span class="hint">Jika fail dipilih, gambar akan dimuat naik automatik ke Supabase Storage dan mengatasi Link Gambar di atas.</span>
+        </div>
+        <div class="full">
+          <button type="submit" id="submitItemBtn" class="btn-primary">+ Tambah Item Baharu</button>
+        </div>
+      </form>
+      <input id="editImageFileInput" type="file" accept="image/*" style="display:none;" />
     </div>
 
     <div class="filter-bar">
@@ -428,7 +460,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = 'https://bqcyaqqmfgbnyhhsjjwi.supabase.co';
+    const SUPABASE_URL = 'https://bqcyaqqmfbgnyhhsjjwi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Vay2hyDEviMK6BkHoRmcHQ_D6ipokFc';
     const STORAGE_BUCKET = 'product-images';
     const ADMIN_PIN = 'Adhwa95#1995';
@@ -493,7 +525,7 @@
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Katalog rasmi Pre-Order & Ready Stock — semak ketersediaan slot, harga terkini, dan buat tempahan terus melalui WhatsApp.';
+        roleDesc.textContent = 'Destinasi Pre-Order & Ready Stock kad koleksi — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
