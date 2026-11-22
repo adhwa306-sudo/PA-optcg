@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PA-optcg vault</title>
+  <title>PNK vaultTCG</title>
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#0b0f17" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
     body {
       margin: 0;
       background: #0b0f17;
@@ -22,27 +25,33 @@
       background: #ffffff;
       color: #111827;
       border-radius: 14px;
-      padding: 18px;
+      padding: 20px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
       margin-bottom: 16px;
     }
     .top-bar {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+      align-items: flex-start;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    h1 {
+    .brand-title {
       margin: 0;
-      font-size: 1.35rem;
-      color: #111827;
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.15rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: #0f172a;
     }
     .sub {
       margin: 0 0 14px;
-      color: #6b7280;
-      font-size: 0.88rem;
+      color: #4b5563;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      max-width: 720px;
     }
     .status-pill {
       font-size: 0.78rem;
@@ -344,6 +353,7 @@
     }
     @media (max-width: 540px) {
       body { padding: 10px; }
+      .brand-title { font-size: 1.7rem; }
       .grid-list { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .item-card { padding: 9px; }
       .form-grid { grid-template-columns: 1fr; }
@@ -355,13 +365,13 @@
   <div class="container">
     <div class="card">
       <div class="top-bar">
-        <h1>Pre-Order & Ready Stock TCG</h1>
+        <h1 class="brand-title">PNK vaultTCG</h1>
         <div style="display:flex; gap:8px; align-items:center;">
           <span id="roleBadge" class="status-pill">Mod Lihat Sahaja</span>
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="sub" id="roleDesc">Pilih kategori Pre-Order atau Ready Stock, semak gambar, harga, baki slot, dan terus order ke WhatsApp.</p>
+      <p class="sub" id="roleDesc">Katalog rasmi Pre-Order &amp; Ready Stock — semak ketersediaan slot, harga terkini, dan buat tempahan terus melalui WhatsApp.</p>
 
       <div id="adminFormWrap" style="display:none;">
         <form id="preorderForm" class="form-grid">
@@ -418,8 +428,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = 'https://bqcyaqqmfbgnyhhsjjwi.supabase.co';
-    const SUPABASE_ANON_KEY ='sb_publishable_Vay2hyDEviMK6BkHoRmcHQ_D6ipokFc';
+    const SUPABASE_URL = 'https://bqcyaqqmfgbnyhhsjjwi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Vay2hyDEviMK6BkHoRmcHQ_D6ipokFc';
     const STORAGE_BUCKET = 'product-images';
     const ADMIN_PIN = 'Adhwa95#1995';
     const WHATSAPP_NUMBER = '60129456492';
@@ -476,14 +486,14 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Anda boleh tambah item Pre-Order / Ready Stock, upload atau tukar gambar, rekod pembeli, dan ubah slot.';
+        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item Pre-Order & Ready Stock, kemas kini gambar, rekod pembeli, dan laraskan slot.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Pilih kategori Pre-Order atau Ready Stock, semak gambar, harga, baki slot, dan terus order ke WhatsApp.';
+        roleDesc.textContent = 'Katalog rasmi Pre-Order & Ready Stock — semak ketersediaan slot, harga terkini, dan buat tempahan terus melalui WhatsApp.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
@@ -558,7 +568,7 @@
       const priceText = formatPrice(item.price);
       const noteLine = item.note ? `\n• Catatan: ${item.note}` : '';
       const message =
-        `Hi, saya berminat nak order item (${cat}) ini:\n` +
+        `Hi PNK vaultTCG, saya berminat nak order item (${cat}) ini:\n` +
         `• Kategori: ${cat}\n` +
         `• Item: ${item.name}\n` +
         `• Harga: ${priceText}\n` +
@@ -575,7 +585,7 @@
       const total = Math.max(1, Number(item.total) || 1);
       const available = Math.max(0, total - bought);
       const text =
-        `${cat.toUpperCase()} OPEN!\n` +
+        `PNK vaultTCG — ${cat.toUpperCase()} OPEN!\n` +
         `• Kategori: ${cat}\n` +
         `• Item: ${item.name}\n` +
         `• Harga: ${formatPrice(item.price)}\n` +
