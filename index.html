@@ -84,6 +84,17 @@
       color: #6b7280;
       font-size: 0.88rem;
     }
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #111827;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
     .status-pill {
       font-size: 0.78rem;
       font-weight: 700;
@@ -122,6 +133,11 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
     .full {
       grid-column: 1 / -1;
     }
@@ -138,7 +154,7 @@
       color: #6b7280;
       margin-top: 4px;
     }
-    input, select {
+    input, select, textarea {
       width: 100%;
       padding: 9px 11px;
       border: 1px solid #d1d5db;
@@ -146,6 +162,10 @@
       font-size: 0.92rem;
       background: #ffffff;
       color: #111827;
+    }
+    textarea {
+      min-height: 68px;
+      resize: vertical;
     }
     input[type="file"] {
       padding: 7px 9px;
@@ -379,8 +399,87 @@
       border-radius: 8px;
       font-size: 0.88rem;
     }
+    .order-filter-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .mini-tab {
+      background: #f3f4f6;
+      color: #374151;
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .mini-tab.active {
+      background: #111827;
+      color: #ffffff;
+    }
+    .orders-table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+    table.orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      background: #ffffff;
+    }
+    table.orders-table th,
+    table.orders-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.orders-table th {
+      background: #f9fafb;
+      font-weight: 700;
+      color: #374151;
+      white-space: nowrap;
+    }
+    .tag-paid {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #dcfce7;
+      color: #166534;
+    }
+    .tag-unpaid {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .tag-shipped {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .tag-unshipped {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #fef3c7;
+      color: #92400e;
+    }
     @media (max-width: 820px) {
       .grid-list { grid-template-columns: repeat(2, 1fr); }
+      .form-grid-3 { grid-template-columns: 1fr; }
     }
     @media (max-width: 540px) {
       body { padding: 10px; }
@@ -407,6 +506,9 @@
     </div>
 
     <div id="adminFormWrap" class="card" style="display:none;">
+      <div class="section-title">
+        <span>Tambah Item Katalog</span>
+      </div>
       <form id="preorderForm" class="form-grid">
         <div>
           <label for="itemCategory">Kategori</label>
@@ -447,6 +549,66 @@
       <input id="editImageFileInput" type="file" accept="image/*" style="display:none;" />
     </div>
 
+    <div id="adminOrdersWrap" class="card" style="display:none;">
+      <div class="section-title">
+        <span>Rekod Detail Pembeli (Khusus Admin)</span>
+        <span id="ordersSummary" class="status-pill">0 Rekod</span>
+      </div>
+
+      <form id="buyerOrderForm" class="form-grid-3" style="margin-bottom:16px;">
+        <div>
+          <label for="orderItemSelect">Item Dibeli</label>
+          <select id="orderItemSelect" required></select>
+        </div>
+        <div>
+          <label for="orderBuyerName">Nama Pembeli</label>
+          <input id="orderBuyerName" type="text" placeholder="Nama penuh pembeli" required />
+        </div>
+        <div>
+          <label for="orderBuyerPhone">No. Telefon</label>
+          <input id="orderBuyerPhone" type="text" placeholder="Contoh: 012-3456789" required />
+        </div>
+        <div>
+          <label for="orderBuyerQty">Kuantiti (pcs)</label>
+          <input id="orderBuyerQty" type="number" min="1" value="1" required />
+        </div>
+        <div>
+          <label for="orderPaymentStatus">Status Payment</label>
+          <select id="orderPaymentStatus">
+            <option value="Belum Bayar">Belum Bayar</option>
+            <option value="Deposit">Deposit</option>
+            <option value="Full Paid">Full Paid</option>
+          </select>
+        </div>
+        <div>
+          <label for="orderShippingStatus">Status Pos</label>
+          <select id="orderShippingStatus">
+            <option value="Belum Pos">Belum Pos</option>
+            <option value="Sudah Pos">Sudah Pos</option>
+            <option value="COD / Selesai">COD / Selesai</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="orderBuyerAddress">Alamat Lengkap / Lokasi COD</label>
+          <textarea id="orderBuyerAddress" placeholder="Alamat pos lengkap atau lokasi COD..." required></textarea>
+        </div>
+        <div class="full">
+          <button type="submit" id="submitOrderBtn" class="btn-primary">+ Simpan Rekod Detail Pembeli</button>
+        </div>
+      </form>
+
+      <div class="order-filter-row">
+        <button type="button" class="mini-tab active" data-ofilter="ALL" onclick="setOrderFilter('ALL')">Semua</button>
+        <button type="button" class="mini-tab" data-ofilter="UNPAID" onclick="setOrderFilter('UNPAID')">Belum Bayar</button>
+        <button type="button" class="mini-tab" data-ofilter="UNSHIPPED" onclick="setOrderFilter('UNSHIPPED')">Belum Pos</button>
+        <button type="button" class="mini-tab" data-ofilter="SHIPPED" onclick="setOrderFilter('SHIPPED')">Sudah Pos</button>
+      </div>
+
+      <div id="ordersTableContainer" class="orders-table-wrap">
+        <p class="sub" style="padding:12px; margin:0;">Memuatkan rekod pembeli...</p>
+      </div>
+    </div>
+
     <div class="filter-bar">
       <button type="button" class="filter-btn active" data-cat="ALL" onclick="setCategoryFilter('ALL')">Semua</button>
       <button type="button" class="filter-btn" data-cat="Pre-Order" onclick="setCategoryFilter('Pre-Order')">Pre-Order</button>
@@ -469,7 +631,9 @@
     const ADMIN_SESSION_KEY = 'pa_optcg_admin_unlocked';
     let isAdmin = sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
     let activeCategory = 'ALL';
+    let activeOrderFilter = 'ALL';
     let items = [];
+    let buyerOrders = [];
     let supabaseClient = null;
     let pendingEditImageIdx = null;
 
@@ -478,7 +642,12 @@
     const roleDesc = document.getElementById('roleDesc');
     const adminBtn = document.getElementById('adminBtn');
     const adminFormWrap = document.getElementById('adminFormWrap');
+    const adminOrdersWrap = document.getElementById('adminOrdersWrap');
+    const orderItemSelect = document.getElementById('orderItemSelect');
+    const ordersTableContainer = document.getElementById('ordersTableContainer');
+    const ordersSummary = document.getElementById('ordersSummary');
     const submitItemBtn = document.getElementById('submitItemBtn');
+    const submitOrderBtn = document.getElementById('submitOrderBtn');
     const editImageFileInput = document.getElementById('editImageFileInput');
 
     function initSupabase() {
@@ -514,14 +683,27 @@
       return publicData?.publicUrl || '';
     }
 
+    function populateOrderItemDropdown() {
+      if (!orderItemSelect) return;
+      const options = items.map(it => {
+        const cat = normalizeCategory(it.category);
+        return `<option value="${escapeAttr(it.id)}" data-name="${escapeAttr(it.name)}" data-cat="${escapeAttr(cat)}">${escapeHtml(it.name)} [${escapeHtml(cat)}]</option>`;
+      });
+      options.push(`<option value="" data-name="Item Manual" data-cat="Pre-Order">Lain-lain / Item Manual</option>`);
+      orderItemSelect.innerHTML = options.join('');
+    }
+
     function updateAdminUI() {
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item Pre-Order & Ready Stock, kemas kini gambar, rekod pembeli, dan laraskan slot.';
+        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item, rekod detail pembeli (nama, telefon, alamat, payment & status pos), dan laraskan slot.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
+        adminOrdersWrap.style.display = 'block';
+        populateOrderItemDropdown();
+        loadBuyerOrders();
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
@@ -529,6 +711,7 @@
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
+        adminOrdersWrap.style.display = 'none';
       }
       renderItems();
     }
@@ -539,6 +722,14 @@
         btn.classList.toggle('active', btn.dataset.cat === cat);
       });
       renderItems();
+    }
+
+    function setOrderFilter(filterKey) {
+      activeOrderFilter = filterKey;
+      document.querySelectorAll('.mini-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.ofilter === filterKey);
+      });
+      renderBuyerOrders();
     }
 
     function toggleAdmin() {
@@ -571,8 +762,192 @@
         return;
       }
       items = Array.isArray(data) ? data : [];
+      if (isAdmin) populateOrderItemDropdown();
       renderItems();
     }
+
+    async function loadBuyerOrders() {
+      if (!isAdmin) return;
+      if (!supabaseClient && !initSupabase()) return;
+
+      const { data, error } = await supabaseClient
+        .from('buyer_orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        ordersTableContainer.innerHTML = `<div class="msg-error" style="margin:10px;">Gagal memuatkan rekod pembeli: ${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      buyerOrders = Array.isArray(data) ? data : [];
+      renderBuyerOrders();
+    }
+
+    function renderBuyerOrders() {
+      if (!isAdmin) return;
+
+      const totalCount = buyerOrders.length;
+      const unpaidCount = buyerOrders.filter(o => o.payment_status === 'Belum Bayar').length;
+      const unshippedCount = buyerOrders.filter(o => o.shipping_status === 'Belum Pos').length;
+      ordersSummary.textContent = `${totalCount} Rekod • ${unpaidCount} Belum Bayar • ${unshippedCount} Belum Pos`;
+
+      const filtered = buyerOrders.filter(o => {
+        if (activeOrderFilter === 'UNPAID') return o.payment_status === 'Belum Bayar';
+        if (activeOrderFilter === 'UNSHIPPED') return o.shipping_status === 'Belum Pos';
+        if (activeOrderFilter === 'SHIPPED') return o.shipping_status === 'Sudah Pos' || o.shipping_status === 'COD / Selesai';
+        return true;
+      });
+
+      if (!filtered.length) {
+        ordersTableContainer.innerHTML = `<p class="sub" style="padding:12px; margin:0;">Tiada rekod pembeli untuk penapis ini.</p>`;
+        return;
+      }
+
+      const rowsHtml = filtered.map(order => {
+        const payClass = order.payment_status === 'Full Paid' ? 'tag-paid' : 'tag-unpaid';
+        const shipClass = (order.shipping_status === 'Sudah Pos' || order.shipping_status === 'COD / Selesai')
+          ? 'tag-shipped'
+          : 'tag-unshipped';
+
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(order.buyer_name)}</strong><br/>
+              <span style="color:#4b5563;">${escapeHtml(order.phone || '-')}</span>
+            </td>
+            <td>
+              <strong>${escapeHtml(order.item_name)}</strong> (${Number(order.qty || 1)} pcs)<br/>
+              <span class="cat-badge ${order.category === 'Ready Stock' ? 'ready' : ''}" style="margin-top:4px; display:inline-block;">${escapeHtml(order.category || 'Pre-Order')}</span>
+            </td>
+            <td style="max-width:210px; white-space:pre-line; color:#374151;">${escapeHtml(order.address || '-')}</td>
+            <td>
+              <span class="${payClass}">${escapeHtml(order.payment_status || 'Belum Bayar')}</span><br/>
+              <select style="margin-top:6px; padding:4px 6px; font-size:0.75rem;" onchange="updateOrderStatus('${escapeAttr(order.id)}', 'payment_status', this.value)">
+                <option value="Belum Bayar" ${order.payment_status === 'Belum Bayar' ? 'selected' : ''}>Belum Bayar</option>
+                <option value="Deposit" ${order.payment_status === 'Deposit' ? 'selected' : ''}>Deposit</option>
+                <option value="Full Paid" ${order.payment_status === 'Full Paid' ? 'selected' : ''}>Full Paid</option>
+              </select>
+            </td>
+            <td>
+              <span class="${shipClass}">${escapeHtml(order.shipping_status || 'Belum Pos')}</span><br/>
+              <select style="margin-top:6px; padding:4px 6px; font-size:0.75rem;" onchange="updateOrderStatus('${escapeAttr(order.id)}', 'shipping_status', this.value)">
+                <option value="Belum Pos" ${order.shipping_status === 'Belum Pos' ? 'selected' : ''}>Belum Pos</option>
+                <option value="Sudah Pos" ${order.shipping_status === 'Sudah Pos' ? 'selected' : ''}>Sudah Pos</option>
+                <option value="COD / Selesai" ${order.shipping_status === 'COD / Selesai' ? 'selected' : ''}>COD / Selesai</option>
+              </select>
+            </td>
+            <td>
+              <button type="button" class="btn-del" onclick="deleteBuyerOrder('${escapeAttr(order.id)}')">Padam</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      ordersTableContainer.innerHTML = `
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Pembeli &amp; Tel</th>
+              <th>Item</th>
+              <th>Alamat</th>
+              <th>Payment</th>
+              <th>Status Pos</th>
+              <th>Tindakan</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      `;
+    }
+
+    async function updateOrderStatus(orderId, field, value) {
+      if (!isAdmin || !supabaseClient) return;
+      const { data, error } = await supabaseClient
+        .from('buyer_orders')
+        .update({ [field]: value })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Gagal kemas kini status: ' + error.message);
+        return;
+      }
+      const idx = buyerOrders.findIndex(o => o.id === orderId);
+      if (idx !== -1) buyerOrders[idx] = data;
+      renderBuyerOrders();
+    }
+
+    async function deleteBuyerOrder(orderId) {
+      if (!isAdmin || !supabaseClient) return;
+      if (!confirm('Padam rekod pembeli ini?')) return;
+
+      const { error } = await supabaseClient
+        .from('buyer_orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) {
+        alert('Gagal padam rekod pembeli: ' + error.message);
+        return;
+      }
+      buyerOrders = buyerOrders.filter(o => o.id !== orderId);
+      renderBuyerOrders();
+    }
+
+    document.getElementById('buyerOrderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!isAdmin || !supabaseClient) return;
+
+      const selectedOpt = orderItemSelect.options[orderItemSelect.selectedIndex];
+      const itemId = orderItemSelect.value || null;
+      const itemName = selectedOpt ? (selectedOpt.dataset.name || selectedOpt.textContent) : 'Item';
+      const category = selectedOpt ? normalizeCategory(selectedOpt.dataset.cat) : 'Pre-Order';
+      const buyerName = document.getElementById('orderBuyerName').value.trim();
+      const phone = document.getElementById('orderBuyerPhone').value.trim();
+      const qty = parseInt(document.getElementById('orderBuyerQty').value, 10);
+      const paymentStatus = document.getElementById('orderPaymentStatus').value;
+      const shippingStatus = document.getElementById('orderShippingStatus').value;
+      const address = document.getElementById('orderBuyerAddress').value.trim();
+
+      if (!buyerName || isNaN(qty) || qty < 1) return;
+
+      submitOrderBtn.disabled = true;
+      submitOrderBtn.textContent = 'Sedang menyimpan...';
+
+      try {
+        const newOrder = {
+          id: 'order-' + Date.now(),
+          item_id: itemId,
+          item_name: itemName,
+          category,
+          buyer_name: buyerName,
+          phone,
+          address,
+          qty,
+          payment_status: paymentStatus,
+          shipping_status: shippingStatus
+        };
+
+        const { data, error } = await supabaseClient
+          .from('buyer_orders')
+          .insert([newOrder])
+          .select()
+          .single();
+
+        if (error) {
+          alert('Gagal simpan rekod pembeli: ' + error.message);
+          return;
+        }
+        buyerOrders.unshift(data);
+        e.target.reset();
+        document.getElementById('orderBuyerQty').value = '1';
+        renderBuyerOrders();
+      } finally {
+        submitOrderBtn.disabled = false;
+        submitOrderBtn.textContent = '+ Simpan Rekod Detail Pembeli';
+      }
+    });
 
     function getBoughtQty(item) {
       return (item.buyers || []).reduce((sum, b) => sum + (Number(b.qty) || 0), 0);
@@ -810,6 +1185,7 @@
         return;
       }
       items[itemIdx] = data;
+      if (isAdmin) populateOrderItemDropdown();
       renderItems();
     }
 
@@ -921,6 +1297,7 @@
         return;
       }
       items.splice(itemIdx, 1);
+      if (isAdmin) populateOrderItemDropdown();
       renderItems();
     }
 
@@ -981,6 +1358,7 @@
         }
         items.unshift(data);
         e.target.reset();
+        if (isAdmin) populateOrderItemDropdown();
         renderItems();
       } catch (err) {
         alert(err.message);
