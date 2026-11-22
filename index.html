@@ -64,7 +64,7 @@
       color: #cbd5e1;
       font-size: 0.92rem;
       line-height: 1.5;
-      max-width: 700px;
+      max-width: 720px;
     }
     .hero-card .status-pill {
       background: rgba(255, 255, 255, 0.12);
@@ -265,6 +265,10 @@
     .cat-badge.ready {
       background: #e0f2fe;
       color: #075985;
+    }
+    .cat-badge.single {
+      background: #ffedd5;
+      color: #9a3412;
     }
     .badge {
       padding: 3px 8px;
@@ -502,7 +506,7 @@
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order &amp; Ready Stock kad koleksi — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.</p>
+      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock &amp; Single Card/Slab — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.</p>
     </div>
 
     <div id="adminFormWrap" class="card" style="display:none;">
@@ -515,15 +519,16 @@
           <select id="itemCategory" required>
             <option value="Pre-Order">Pre-Order</option>
             <option value="Ready Stock">Ready Stock</option>
+            <option value="Single Card">Single Card</option>
           </select>
         </div>
         <div>
-          <label for="itemName">Nama Item / Set Kad</label>
-          <input id="itemName" type="text" placeholder="Contoh: Luffy Gear 5 Promo" required />
+          <label for="itemName">Nama Kad / Slab / Set</label>
+          <input id="itemName" type="text" placeholder="Contoh: Luffy OP07-073 / PSA 10 Slab" required />
         </div>
         <div>
           <label for="totalSlot">Jumlah Slot / Stok</label>
-          <input id="totalSlot" type="number" min="1" placeholder="Contoh: 15" required />
+          <input id="totalSlot" type="number" min="1" placeholder="Contoh: 1" required />
         </div>
         <div>
           <label for="itemPrice">Harga Seunit (RM)</label>
@@ -531,7 +536,7 @@
         </div>
         <div>
           <label for="slotNote">Catatan Ringkas (Pilihan)</label>
-          <input id="slotNote" type="text" placeholder="Contoh: Est sampai 25/11/2026" />
+          <input id="slotNote" type="text" placeholder="Contoh: NM / PSA 10 / Est 25/11/2026" />
         </div>
         <div>
           <label for="itemImage">Link Gambar (Pilihan)</label>
@@ -613,6 +618,7 @@
       <button type="button" class="filter-btn active" data-cat="ALL" onclick="setCategoryFilter('ALL')">Semua</button>
       <button type="button" class="filter-btn" data-cat="Pre-Order" onclick="setCategoryFilter('Pre-Order')">Pre-Order</button>
       <button type="button" class="filter-btn" data-cat="Ready Stock" onclick="setCategoryFilter('Ready Stock')">Ready Stock</button>
+      <button type="button" class="filter-btn" data-cat="Single Card" onclick="setCategoryFilter('Single Card')">Single Card</button>
     </div>
 
     <div id="listContainer">
@@ -649,6 +655,18 @@
     const submitItemBtn = document.getElementById('submitItemBtn');
     const submitOrderBtn = document.getElementById('submitOrderBtn');
     const editImageFileInput = document.getElementById('editImageFileInput');
+
+    function normalizeCategory(cat) {
+      if (cat === 'Ready Stock') return 'Ready Stock';
+      if (cat === 'Single Card') return 'Single Card';
+      return 'Pre-Order';
+    }
+
+    function getCategoryBadgeClass(cat) {
+      if (cat === 'Ready Stock') return 'cat-badge ready';
+      if (cat === 'Single Card') return 'cat-badge single';
+      return 'cat-badge';
+    }
 
     function initSupabase() {
       if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('TAMPAL_KUNCI')) {
@@ -697,7 +715,7 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item, rekod detail pembeli (nama, telefon, alamat, payment & status pos), dan laraskan slot.';
+        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item Pre-Order, Ready Stock & Single Card, rekod detail pembeli, dan laraskan slot.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
@@ -707,7 +725,7 @@
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Destinasi Pre-Order & Ready Stock kad koleksi — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.';
+        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock & Single Card/Slab — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
@@ -808,6 +826,7 @@
         const shipClass = (order.shipping_status === 'Sudah Pos' || order.shipping_status === 'COD / Selesai')
           ? 'tag-shipped'
           : 'tag-unshipped';
+        const cat = normalizeCategory(order.category);
 
         return `
           <tr>
@@ -817,7 +836,7 @@
             </td>
             <td>
               <strong>${escapeHtml(order.item_name)}</strong> (${Number(order.qty || 1)} pcs)<br/>
-              <span class="cat-badge ${order.category === 'Ready Stock' ? 'ready' : ''}" style="margin-top:4px; display:inline-block;">${escapeHtml(order.category || 'Pre-Order')}</span>
+              <span class="${getCategoryBadgeClass(cat)}" style="margin-top:4px; display:inline-block;">${escapeHtml(cat)}</span>
             </td>
             <td style="max-width:210px; white-space:pre-line; color:#374151;">${escapeHtml(order.address || '-')}</td>
             <td>
@@ -959,10 +978,6 @@
       return 'RM ' + num.toFixed(2);
     }
 
-    function normalizeCategory(cat) {
-      return cat === 'Ready Stock' ? 'Ready Stock' : 'Pre-Order';
-    }
-
     function isRecentItem(createdAt) {
       if (!createdAt) return false;
       const ageMs = Date.now() - new Date(createdAt).getTime();
@@ -1071,7 +1086,7 @@
             <div>
               ${imgHtml}
               <div class="badge-row">
-                <span class="cat-badge ${cat === 'Ready Stock' ? 'ready' : ''}">${escapeHtml(cat)}</span>
+                <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(cat)}</span>
                 ${showNewBadge ? `<span class="badge-new">NEW</span>` : ''}
                 <span class="badge">${isSoldOut ? 'SOLD OUT' : available + ' AVAIL'}</span>
               </div>
@@ -1171,7 +1186,12 @@
     async function toggleCategory(itemIdx) {
       if (!isAdmin || !supabaseClient) return;
       const item = items[itemIdx];
-      const nextCat = normalizeCategory(item.category) === 'Pre-Order' ? 'Ready Stock' : 'Pre-Order';
+      const currCat = normalizeCategory(item.category);
+      const nextCat = currCat === 'Pre-Order'
+        ? 'Ready Stock'
+        : currCat === 'Ready Stock'
+          ? 'Single Card'
+          : 'Pre-Order';
 
       const { data, error } = await supabaseClient
         .from('preorder_items')
