@@ -258,12 +258,17 @@
       background: #ffffff;
       color: #111827;
       border-radius: 12px;
-      padding: 12px;
+      padding: 11px;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
       border-top: 4px solid #16a34a;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
+    }
+    .item-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.34);
     }
     .item-card.sold-out {
       border-top-color: #dc2626;
@@ -274,31 +279,116 @@
     .item-card.auction-closed {
       border-top-color: #6b7280;
     }
-    .product-img {
+    .slider-wrap {
+      position: relative;
       width: 100%;
       aspect-ratio: 3 / 4;
-      object-fit: cover;
       border-radius: 10px;
+      overflow: hidden;
       border: 1px solid #e5e7eb;
-      margin-bottom: 10px;
-      display: block;
       background: #f9fafb;
+      margin-bottom: 10px;
+    }
+    .slider-track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+    }
+    .slider-track::-webkit-scrollbar {
+      display: none;
+    }
+    .slider-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .img-placeholder {
       width: 100%;
-      aspect-ratio: 3 / 4;
-      border-radius: 10px;
-      border: 1px dashed #d1d5db;
-      background: #f9fafb;
+      height: 100%;
       color: #9ca3af;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 10px;
       text-align: center;
       padding: 8px;
+    }
+    .slide-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      z-index: 2;
+    }
+    .slide-arrow.prev { left: 7px; }
+    .slide-arrow.next { right: 7px; }
+    .slide-dots {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+      background: rgba(15, 23, 42, 0.65);
+      padding: 4px 8px;
+      border-radius: 999px;
+      z-index: 2;
+    }
+    .slide-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.45);
+      cursor: pointer;
+    }
+    .slide-dot.active {
+      background: #f59e0b;
+      width: 14px;
+    }
+    .compact-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .item-title {
+      font-weight: 700;
+      font-size: 0.96rem;
+      line-height: 1.3;
+      color: #111827;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .item-price {
+      font-weight: 800;
+      font-size: 0.94rem;
+      color: #111827;
     }
     .badge-row {
       display: flex;
@@ -358,21 +448,8 @@
       background: #fef3c7;
       color: #92400e;
     }
-    .item-title {
-      font-weight: 700;
-      font-size: 0.98rem;
-      line-height: 1.3;
-      margin-bottom: 4px;
-      color: #111827;
-    }
-    .item-price {
-      font-weight: 800;
-      font-size: 0.95rem;
-      color: #111827;
-      margin-bottom: 4px;
-    }
     .item-note {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: #6b7280;
       margin-bottom: 8px;
     }
@@ -411,7 +488,7 @@
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 9px;
+      padding: 10px;
       margin-bottom: 10px;
     }
     .bid-form {
@@ -421,15 +498,15 @@
       margin-top: 6px;
     }
     .bid-form input {
-      padding: 6px 8px;
-      font-size: 0.8rem;
+      padding: 7px 9px;
+      font-size: 0.82rem;
     }
     .btn-bid {
       grid-column: 1 / -1;
       background: #d97706;
       color: #ffffff;
-      padding: 8px 10px;
-      font-size: 0.82rem;
+      padding: 9px 10px;
+      font-size: 0.84rem;
       font-weight: 700;
       width: 100%;
     }
@@ -438,9 +515,9 @@
       text-decoration: none;
       background: #16a34a;
       color: #ffffff;
-      padding: 9px 10px;
+      padding: 10px 12px;
       border-radius: 8px;
-      font-size: 0.84rem;
+      font-size: 0.86rem;
       font-weight: 700;
       text-align: center;
       margin-bottom: 10px;
@@ -456,11 +533,11 @@
       color: #111827;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 9px;
+      padding: 10px;
       margin-bottom: 10px;
     }
     .buyers-title {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 700;
       margin-bottom: 6px;
       color: #1f2937;
@@ -468,7 +545,7 @@
     .buyer-list {
       margin: 0;
       padding-left: 16px;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
     }
     .buyer-list li {
       margin-bottom: 4px;
@@ -486,18 +563,19 @@
     }
     .buyer-form {
       display: grid;
-      grid-template-columns: 1fr 62px auto;
-      gap: 5px;
+      grid-template-columns: 1fr 68px auto;
+      gap: 6px;
       margin-top: 8px;
     }
     .buyer-form input {
-      padding: 6px 8px;
-      font-size: 0.8rem;
+      padding: 7px 8px;
+      font-size: 0.82rem;
     }
     .actions {
       display: flex;
-      gap: 5px;
+      gap: 6px;
       flex-wrap: wrap;
+      margin-top: 8px;
     }
     .btn-slot { background: #e5e7eb; color: #111827; }
     .btn-copy { background: #dbeafe; color: #1e40af; }
@@ -587,6 +665,54 @@
       background: #fef3c7;
       color: #92400e;
     }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 999;
+      overflow-y: auto;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-box {
+      background: #ffffff;
+      color: #111827;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+      max-height: 92vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .modal-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #111827;
+    }
+    .btn-close-modal {
+      background: #f3f4f6;
+      color: #111827;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
     @media (max-width: 820px) {
       .grid-list { grid-template-columns: repeat(2, 1fr); }
       .form-grid-3 { grid-template-columns: 1fr; }
@@ -596,7 +722,9 @@
       .hero-card { padding: 16px; }
       .brand-title { font-size: 1.75rem; }
       .grid-list { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .item-card { padding: 9px; }
+      .item-card { padding: 8px; }
+      .item-title { font-size: 0.86rem; }
+      .item-price { font-size: 0.85rem; }
       .form-grid { grid-template-columns: 1fr; }
       .buyer-form { grid-template-columns: 1fr; }
       .bid-form { grid-template-columns: 1fr; }
@@ -613,7 +741,7 @@
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock, Single Card/Slab &amp; Lelong — semak slot tersedia, harga semasa, bid item lelongan, dan tempah terus ke WhatsApp.</p>
+      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock, Single Card/Slab &amp; Lelong — klik kad untuk lihat detail penuh, slide hingga 4 gambar, dan tempah terus ke WhatsApp.</p>
     </div>
 
     <div id="adminFormWrap" class="card" style="display:none;">
@@ -648,19 +776,19 @@
           <input id="slotNote" type="text" placeholder="Contoh: NM / PSA 10 / Est 25/11/2026" />
         </div>
         <div>
-          <label for="itemImage">Link Gambar (Pilihan)</label>
-          <input id="itemImage" type="text" placeholder="https://... (jika tak upload fail)" />
+          <label for="itemImage">Link Gambar (Maks. 4 Link, Pilihan)</label>
+          <input id="itemImage" type="text" placeholder="https://img1.jpg, https://img2.jpg (jika tak upload fail)" />
         </div>
         <div class="full">
-          <label for="itemImageFile">Atau Upload Gambar Dari Telefon / Komputer (Pilihan)</label>
-          <input id="itemImageFile" type="file" accept="image/*" />
-          <span class="hint">Jika fail dipilih, gambar akan dimuat naik automatik ke Supabase Storage dan mengatasi Link Gambar di atas.</span>
+          <label for="itemImageFile">Atau Upload Gambar Dari Peranti (Maks. 4 Gambar, Pilihan)</label>
+          <input id="itemImageFile" type="file" accept="image/*" multiple />
+          <span class="hint">Boleh pilih sehingga 4 gambar untuk 1 item (boleh slide). Jika fail dipilih, ia akan dimuat naik ke Supabase Storage dan mengatasi Link Gambar di atas.</span>
         </div>
         <div class="full">
           <button type="submit" id="submitItemBtn" class="btn-primary">+ Tambah Item Baharu</button>
         </div>
       </form>
-      <input id="editImageFileInput" type="file" accept="image/*" style="display:none;" />
+      <input id="editImageFileInput" type="file" accept="image/*" multiple style="display:none;" />
     </div>
 
     <div id="adminAuctionWrap" class="card" style="display:none;">
@@ -698,18 +826,18 @@
           <input id="aucCondition" type="text" placeholder="Contoh: PSA 10 / Mint / COD Tanjung Malim" />
         </div>
         <div>
-          <label for="aucImage">Link Gambar (Pilihan)</label>
-          <input id="aucImage" type="text" placeholder="https://... (jika tak upload fail)" />
+          <label for="aucImage">Link Gambar (Maks. 4 Link, Pilihan)</label>
+          <input id="aucImage" type="text" placeholder="https://img1.jpg, https://img2.jpg" />
         </div>
         <div class="full" style="grid-column: span 2;">
-          <label for="aucImageFile">Atau Upload Gambar Lelong Dari Peranti (Pilihan)</label>
-          <input id="aucImageFile" type="file" accept="image/*" />
+          <label for="aucImageFile">Atau Upload Gambar Lelong Dari Peranti (Maks. 4 Gambar, Pilihan)</label>
+          <input id="aucImageFile" type="file" accept="image/*" multiple />
         </div>
         <div class="full">
           <button type="submit" id="submitAuctionBtn" class="btn-primary">+ Buka Item Lelong Baharu</button>
         </div>
       </form>
-      <input id="editAuctionImageInput" type="file" accept="image/*" style="display:none;" />
+      <input id="editAuctionImageInput" type="file" accept="image/*" multiple style="display:none;" />
     </div>
 
     <div id="adminOrdersWrap" class="card" style="display:none;">
@@ -804,6 +932,11 @@
     </div>
   </div>
 
+  <!-- Modal Detail Item / Lelong Bila Kad Diklik -->
+  <div id="detailModal" class="modal-backdrop" onclick="handleBackdropClick(event)">
+    <div id="detailModalBox" class="modal-box"></div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://bqcyaqqmfbgnyhhsjjwi.supabase.co';
@@ -811,6 +944,7 @@
     const STORAGE_BUCKET = 'product-images';
     const ADMIN_PIN = 'Adhwa95#1995';
     const WHATSAPP_NUMBER = '60129456492';
+    const MAX_IMAGES = 4;
 
     const CATEGORY_CYCLE = [
       'Pre-Order',
@@ -832,6 +966,7 @@
     let supabaseClient = null;
     let pendingEditImageIdx = null;
     let pendingEditAuctionIdx = null;
+    let activeModalTarget = null; // { type: 'item' | 'auction', id: string }
 
     const listContainer = document.getElementById('listContainer');
     const auctionContainer = document.getElementById('auctionContainer');
@@ -839,6 +974,8 @@
     const auctionSection = document.getElementById('auctionSection');
     const tabCatalog = document.getElementById('tabCatalog');
     const tabAuction = document.getElementById('tabAuction');
+    const detailModal = document.getElementById('detailModal');
+    const detailModalBox = document.getElementById('detailModalBox');
     const roleBadge = document.getElementById('roleBadge');
     const roleDesc = document.getElementById('roleDesc');
     const adminBtn = document.getElementById('adminBtn');
@@ -854,6 +991,261 @@
     const submitOrderBtn = document.getElementById('submitOrderBtn');
     const editImageFileInput = document.getElementById('editImageFileInput');
     const editAuctionImageInput = document.getElementById('editAuctionImageInput');
+
+    function parseImages(rawVal) {
+      if (!rawVal) return [];
+      const text = String(rawVal).trim();
+      if (!text) return [];
+      if (text.startsWith('[')) {
+        try {
+          const arr = JSON.parse(text);
+          if (Array.isArray(arr)) {
+            return arr.map(x => String(x || '').trim()).filter(Boolean).slice(0, MAX_IMAGES);
+          }
+        } catch (_) {}
+      }
+      return text
+        .split(/[\n,]+/)
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, MAX_IMAGES);
+    }
+
+    function serializeImages(urls) {
+      const clean = (Array.isArray(urls) ? urls : [])
+        .map(s => String(s || '').trim())
+        .filter(Boolean)
+        .slice(0, MAX_IMAGES);
+      return JSON.stringify(clean);
+    }
+
+    async function resolveImagesInput(fileList, typedUrlText) {
+      const files = fileList ? Array.from(fileList).slice(0, MAX_IMAGES) : [];
+      if (files.length > 0) {
+        const uploadedUrls = [];
+        for (const f of files) {
+          const url = await uploadImageToStorage(f);
+          if (url) uploadedUrls.push(url);
+        }
+        return uploadedUrls.slice(0, MAX_IMAGES);
+      }
+      return parseImages(typedUrlText);
+    }
+
+    function slideTrackTo(trackId, idx) {
+      const track = document.getElementById(trackId);
+      if (!track) return;
+      const totalSlides = track.children.length;
+      if (!totalSlides) return;
+      const safeIdx = ((idx % totalSlides) + totalSlides) % totalSlides;
+      track.scrollTo({ left: safeIdx * track.clientWidth, behavior: 'smooth' });
+      updateSliderDots(trackId, safeIdx);
+    }
+
+    function stepSlide(e, trackId, delta) {
+      e.stopPropagation();
+      const track = document.getElementById(trackId);
+      if (!track) return;
+      const totalSlides = track.children.length;
+      if (!totalSlides) return;
+      const currIdx = track.clientWidth > 0 ? Math.round(track.scrollLeft / track.clientWidth) : 0;
+      slideTrackTo(trackId, currIdx + delta);
+    }
+
+    function updateSliderDots(trackId, activeIdx) {
+      const dotsWrap = document.getElementById(trackId + '-dots');
+      if (!dotsWrap) return;
+      Array.from(dotsWrap.children).forEach((dot, i) => {
+        dot.classList.toggle('active', i === activeIdx);
+      });
+    }
+
+    function onSliderScroll(trackId) {
+      const track = document.getElementById(trackId);
+      if (!track || !track.clientWidth) return;
+      const idx = Math.round(track.scrollLeft / track.clientWidth);
+      updateSliderDots(trackId, idx);
+    }
+
+    function buildSliderHtml(trackId, images, altText) {
+      const imgs = (images || []).slice(0, MAX_IMAGES);
+      if (!imgs.length) {
+        return `<div class="slider-wrap"><div class="img-placeholder">Tiada Gambar</div></div>`;
+      }
+      const slidesHtml = imgs.map(src => `
+        <div class="slider-slide">
+          <img src="${escapeAttr(src)}" alt="${escapeAttr(altText)}" class="product-img" loading="lazy" />
+        </div>
+      `).join('');
+
+      const arrowsHtml = imgs.length > 1 ? `
+        <button type="button" class="slide-arrow prev" onclick="stepSlide(event, '${escapeAttr(trackId)}', -1)" aria-label="Gambar sebelum">&#8249;</button>
+        <button type="button" class="slide-arrow next" onclick="stepSlide(event, '${escapeAttr(trackId)}', 1)" aria-label="Gambar seterusnya">&#8250;</button>
+        <div id="${escapeAttr(trackId)}-dots" class="slide-dots" onclick="event.stopPropagation()">
+          ${imgs.map((_, i) => `<span class="slide-dot ${i === 0 ? 'active' : ''}" onclick="slideTrackTo('${escapeAttr(trackId)}', ${i})"></span>`).join('')}
+        </div>
+      ` : '';
+
+      return `
+        <div class="slider-wrap">
+          <div id="${escapeAttr(trackId)}" class="slider-track" onscroll="onSliderScroll('${escapeAttr(trackId)}')">
+            ${slidesHtml}
+          </div>
+          ${arrowsHtml}
+        </div>
+      `;
+    }
+
+    function openDetailModal(type, id) {
+      activeModalTarget = { type, id };
+      renderDetailModal();
+      detailModal.classList.add('open');
+    }
+
+    function closeDetailModal() {
+      activeModalTarget = null;
+      detailModal.classList.remove('open');
+      detailModalBox.innerHTML = '';
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target === detailModal) {
+        closeDetailModal();
+      }
+    }
+
+    function renderDetailModal() {
+      if (!activeModalTarget) return;
+      if (activeModalTarget.type === 'item') {
+        const itemIdx = items.findIndex(x => x.id === activeModalTarget.id);
+        if (itemIdx === -1) { closeDetailModal(); return; }
+        const item = items[itemIdx];
+        const cat = normalizeCategory(item.category);
+        const bought = getBoughtQty(item);
+        const total = Math.max(1, Number(item.total) || 1);
+        const available = Math.max(0, total - bought);
+        const isSoldOut = available === 0;
+        const showNewBadge = isRecentItem(item.created_at);
+        const imgs = parseImages(item.image_url);
+
+        const orderBtnHtml = isSoldOut
+          ? `<span class="btn-order disabled">SOLD OUT</span>`
+          : `<a href="${escapeAttr(getWhatsAppOrderUrl(item, available))}" target="_blank" rel="noopener noreferrer" class="btn-order">Order Now (WhatsApp)</a>`;
+
+        const buyers = Array.isArray(item.buyers) ? item.buyers : [];
+        const buyersHtml = buyers.length
+          ? `<ol class="buyer-list">` + buyers.map((b, bIdx) => `
+              <li>
+                <span><strong>${escapeHtml(b.name)}</strong> (${Number(b.qty)})</span>
+                ${isAdmin ? `<button type="button" class="btn-mini-del" onclick="removeBuyer(${itemIdx}, ${bIdx})">x</button>` : ''}
+              </li>
+            `).join('') + `</ol>`
+          : `<div class="item-note" style="margin:0;">Belum ada pembeli.</div>`;
+
+        const buyerFormHtml = isAdmin ? `
+          <form class="buyer-form" onsubmit="addBuyer(event, ${itemIdx})">
+            <input type="text" id="buyerName-${itemIdx}" placeholder="Nama pembeli" required />
+            <input type="number" id="buyerQty-${itemIdx}" min="1" value="1" required />
+            <button type="submit" class="btn-slot">+</button>
+          </form>
+        ` : '';
+
+        const adminActionsHtml = isAdmin ? `
+          <div class="actions">
+            <button type="button" class="btn-slot" onclick="toggleCategory(${itemIdx})">Tukar Kat.</button>
+            <button type="button" class="btn-copy" onclick="copyPromoText('${escapeAttr(item.id)}')">Copy</button>
+            <button type="button" class="btn-slot" onclick="editPrice(${itemIdx})">Harga</button>
+            <button type="button" class="btn-slot" onclick="uploadImageForItem(${itemIdx})">Upload Gbr (Max 4)</button>
+            <button type="button" class="btn-slot" onclick="editImageUrl(${itemIdx})">Link Gbr</button>
+            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, 1)">+1</button>
+            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, -1)">-1</button>
+            <button type="button" class="btn-del" onclick="deleteItem(${itemIdx})">Padam</button>
+          </div>
+        ` : '';
+
+        detailModalBox.innerHTML = `
+          <div class="modal-head">
+            <h2 class="modal-title">${escapeHtml(item.name)}</h2>
+            <button type="button" class="btn-close-modal" onclick="closeDetailModal()">✕</button>
+          </div>
+          ${buildSliderHtml('modal-slide-' + item.id, imgs, item.name)}
+          <div class="badge-row">
+            <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(formatCategoryDisplay(cat))}</span>
+            ${showNewBadge ? `<span class="badge-new">NEW</span>` : ''}
+            <span class="badge">${isSoldOut ? 'SOLD OUT' : available + ' AVAIL'}</span>
+          </div>
+          <div class="item-price" style="font-size:1.05rem; margin-bottom:6px;">${escapeHtml(formatPrice(item.price))}</div>
+          ${item.note ? `<div class="item-note">${escapeHtml(item.note)}</div>` : ''}
+          <div class="stats">
+            <div><div class="stat-num">${total}</div><div class="stat-label">Slot</div></div>
+            <div><div class="stat-num">${bought}</div><div class="stat-label">Beli</div></div>
+            <div><div class="stat-num">${available}</div><div class="stat-label">Baki</div></div>
+          </div>
+          ${orderBtnHtml}
+          <div class="buyers-box">
+            <div class="buyers-title">Pembeli (${buyers.length})</div>
+            ${buyersHtml}
+            ${buyerFormHtml}
+          </div>
+          ${adminActionsHtml}
+        `;
+      } else if (activeModalTarget.type === 'auction') {
+        const aucIdx = auctionItems.findIndex(x => x.id === activeModalTarget.id);
+        if (aucIdx === -1) { closeDetailModal(); return; }
+        const auc = auctionItems[aucIdx];
+        const isClosed = auc.status === 'CLOSED';
+        const cat = normalizeCategory(auc.category);
+        const startPrice = Number(auc.start_price) || 0;
+        const currentBid = Math.max(startPrice, Number(auc.current_bid) || 0);
+        const inc = Math.max(1, Number(auc.bid_increment) || 5);
+        const suggestedBid = auc.highest_bidder ? (currentBid + inc).toFixed(2) : currentBid.toFixed(2);
+        const imgs = parseImages(auc.image_url);
+
+        const bidFormHtml = !isClosed ? `
+          <div class="bid-box">
+            <div class="buyers-title">Hantar Tawaran Bid (Ke WhatsApp)</div>
+            <form class="bid-form" onsubmit="submitBuyerBid(event, ${aucIdx})">
+              <input type="text" id="bidderName-${aucIdx}" placeholder="Nama anda" required />
+              <input type="number" id="bidAmount-${aucIdx}" step="0.01" min="0" value="${escapeAttr(suggestedBid)}" required />
+              <button type="submit" class="btn-bid">Bid Sekarang</button>
+            </form>
+          </div>
+        ` : `<div class="item-note" style="text-align:center; font-weight:700;">Lelongan Ditutup</div>`;
+
+        const adminAucActions = isAdmin ? `
+          <div class="actions">
+            <button type="button" class="btn-slot" onclick="adminSetHighestBid(${aucIdx})">Set Bid</button>
+            <button type="button" class="btn-slot" onclick="toggleAuctionStatus(${aucIdx})">${isClosed ? 'Buka Lelong' : 'Tutup Lelong'}</button>
+            <button type="button" class="btn-slot" onclick="uploadImageForAuction(${aucIdx})">Upload Gbr (Max 4)</button>
+            <button type="button" class="btn-del" onclick="deleteAuctionItem(${aucIdx})">Padam</button>
+          </div>
+        ` : '';
+
+        detailModalBox.innerHTML = `
+          <div class="modal-head">
+            <h2 class="modal-title">${escapeHtml(auc.title)}</h2>
+            <button type="button" class="btn-close-modal" onclick="closeDetailModal()">✕</button>
+          </div>
+          ${buildSliderHtml('modal-auc-slide-' + auc.id, imgs, auc.title)}
+          <div class="badge-row">
+            <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(formatCategoryDisplay(cat))}</span>
+            <span class="badge ${isClosed ? 'auction-end' : 'auction-live'}">${isClosed ? 'CLOSED' : 'LIVE BID'}</span>
+          </div>
+          <div class="item-price" style="font-size:1.05rem; margin-bottom:6px;">Bid Semasa: RM ${currentBid.toFixed(2)}</div>
+          ${auc.condition_note ? `<div class="item-note">${escapeHtml(auc.condition_note)}</div>` : ''}
+          <div class="stats-2">
+            <div><div class="stat-num">RM ${startPrice.toFixed(2)}</div><div class="stat-label">Harga Mula</div></div>
+            <div><div class="stat-num">+RM ${inc.toFixed(2)}</div><div class="stat-label">Min. Kenaikan</div></div>
+          </div>
+          <div class="buyers-box" style="margin-bottom:10px;">
+            <div style="font-size:0.82rem;"><strong>Highest Bidder:</strong> ${escapeHtml(auc.highest_bidder || 'Belum ada bid')}</div>
+            <div style="font-size:0.78rem; color:#6b7280; margin-top:4px;"><strong>Tamat:</strong> ${escapeHtml(formatEndsAt(auc.ends_at))}</div>
+          </div>
+          ${bidFormHtml}
+          ${adminAucActions}
+        `;
+      }
+    }
 
     function setMainSection(sec) {
       activeMainSection = sec;
@@ -956,7 +1348,7 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item katalog & lelongan, rekod detail pembeli, dan laraskan slot/bid.';
+        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item katalog (max 4 gambar) & lelongan, rekod detail pembeli, dan laraskan slot/bid.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
@@ -968,7 +1360,7 @@
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock, Single Card/Slab & Lelong — semak slot tersedia, harga semasa, bid item lelongan, dan tempah terus ke WhatsApp.';
+        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock, Single Card/Slab & Lelong — klik kad untuk lihat detail penuh, slide hingga 4 gambar, dan tempah terus ke WhatsApp.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
@@ -977,6 +1369,7 @@
       }
       renderItems();
       renderAuctionItems();
+      if (activeModalTarget) renderDetailModal();
     }
 
     function setCategoryFilter(cat) {
@@ -1044,6 +1437,7 @@
       items = Array.isArray(data) ? data : [];
       if (isAdmin) populateOrderItemDropdown();
       renderItems();
+      if (activeModalTarget && activeModalTarget.type === 'item') renderDetailModal();
     }
 
     async function loadAuctionItems() {
@@ -1060,6 +1454,7 @@
       auctionItems = Array.isArray(data) ? data : [];
       if (isAdmin) populateOrderItemDropdown();
       renderAuctionItems();
+      if (activeModalTarget && activeModalTarget.type === 'auction') renderDetailModal();
     }
 
     function formatEndsAt(isoStr) {
@@ -1123,71 +1518,18 @@
         return;
       }
 
-      auctionContainer.innerHTML = `<div class="grid-list">` + auctionItems.map((auc, aucIdx) => {
+      auctionContainer.innerHTML = `<div class="grid-list">` + auctionItems.map((auc) => {
         const isClosed = auc.status === 'CLOSED';
-        const cat = normalizeCategory(auc.category);
         const startPrice = Number(auc.start_price) || 0;
         const currentBid = Math.max(startPrice, Number(auc.current_bid) || 0);
-        const inc = Math.max(1, Number(auc.bid_increment) || 5);
-        const suggestedBid = auc.highest_bidder ? (currentBid + inc).toFixed(2) : currentBid.toFixed(2);
-
-        const imgSrc = (auc.image_url || '').trim();
-        const imgHtml = imgSrc
-          ? `<img src="${escapeAttr(imgSrc)}" alt="${escapeAttr(auc.title)}" class="product-img" />`
-          : `<div class="img-placeholder">Tiada Gambar</div>`;
-
-        const bidFormHtml = !isClosed ? `
-          <div class="bid-box">
-            <div class="buyers-title">Hantar Tawaran Bid (Ke WhatsApp)</div>
-            <form class="bid-form" onsubmit="submitBuyerBid(event, ${aucIdx})">
-              <input type="text" id="bidderName-${aucIdx}" placeholder="Nama anda" required />
-              <input type="number" id="bidAmount-${aucIdx}" step="0.01" min="0" value="${escapeAttr(suggestedBid)}" required />
-              <button type="submit" class="btn-bid">Bid Sekarang</button>
-            </form>
-          </div>
-        ` : `<div class="item-note" style="text-align:center; font-weight:700;">Lelongan Ditutup</div>`;
-
-        const adminAucActions = isAdmin ? `
-          <div class="actions">
-            <button type="button" class="btn-slot" onclick="adminSetHighestBid(${aucIdx})">Set Bid</button>
-            <button type="button" class="btn-slot" onclick="toggleAuctionStatus(${aucIdx})">${isClosed ? 'Buka Lelong' : 'Tutup Lelong'}</button>
-            <button type="button" class="btn-slot" onclick="uploadImageForAuction(${aucIdx})">Upload Gbr</button>
-            <button type="button" class="btn-del" onclick="deleteAuctionItem(${aucIdx})">Padam</button>
-          </div>
-        ` : '';
+        const imgs = parseImages(auc.image_url);
 
         return `
-          <div class="item-card ${isClosed ? 'auction-closed' : 'auction-open'}">
-            <div>
-              ${imgHtml}
-              <div class="badge-row">
-                <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(formatCategoryDisplay(cat))}</span>
-                <span class="badge ${isClosed ? 'auction-end' : 'auction-live'}">${isClosed ? 'CLOSED' : 'LIVE BID'}</span>
-              </div>
+          <div class="item-card ${isClosed ? 'auction-closed' : 'auction-open'}" onclick="openDetailModal('auction', '${escapeAttr(auc.id)}')">
+            ${buildSliderHtml('grid-auc-' + auc.id, imgs, auc.title)}
+            <div class="compact-meta">
               <div class="item-title">${escapeHtml(auc.title)}</div>
-              <div class="item-price">Bid Semasa: RM ${currentBid.toFixed(2)}</div>
-              ${auc.condition_note ? `<div class="item-note">${escapeHtml(auc.condition_note)}</div>` : ''}
-
-              <div class="stats-2">
-                <div>
-                  <div class="stat-num">RM ${startPrice.toFixed(2)}</div>
-                  <div class="stat-label">Harga Mula</div>
-                </div>
-                <div>
-                  <div class="stat-num">+RM ${inc.toFixed(2)}</div>
-                  <div class="stat-label">Min. Kenaikan</div>
-                </div>
-              </div>
-
-              <div class="buyers-box" style="margin-bottom:8px;">
-                <div style="font-size:0.78rem;"><strong>Highest Bidder:</strong> ${escapeHtml(auc.highest_bidder || 'Belum ada bid')}</div>
-                <div style="font-size:0.74rem; color:#6b7280; margin-top:3px;"><strong>Tamat:</strong> ${escapeHtml(formatEndsAt(auc.ends_at))}</div>
-              </div>
-            </div>
-
-            <div>
-              ${bidFormHtml}
-              ${adminAucActions}
+              <div class="item-price">Bid: RM ${currentBid.toFixed(2)}</div>
             </div>
           </div>
         `;
@@ -1223,6 +1565,7 @@
       }
       auctionItems[aucIdx] = data;
       renderAuctionItems();
+      renderDetailModal();
     }
 
     async function toggleAuctionStatus(aucIdx) {
@@ -1243,6 +1586,7 @@
       }
       auctionItems[aucIdx] = data;
       renderAuctionItems();
+      renderDetailModal();
     }
 
     function uploadImageForAuction(aucIdx) {
@@ -1253,17 +1597,17 @@
     }
 
     editAuctionImageInput.addEventListener('change', async (e) => {
-      const file = e.target.files && e.target.files[0];
+      const files = e.target.files;
       const aucIdx = pendingEditAuctionIdx;
       pendingEditAuctionIdx = null;
-      if (!file || aucIdx === null || !isAdmin || !supabaseClient) return;
+      if (!files || !files.length || aucIdx === null || !isAdmin || !supabaseClient) return;
 
       const auc = auctionItems[aucIdx];
       try {
-        const publicUrl = await uploadImageToStorage(file);
+        const urls = await resolveImagesInput(files, '');
         const { data, error } = await supabaseClient
           .from('auction_items')
-          .update({ image_url: publicUrl })
+          .update({ image_url: serializeImages(urls) })
           .eq('id', auc.id)
           .select()
           .single();
@@ -1274,7 +1618,8 @@
         }
         auctionItems[aucIdx] = data;
         renderAuctionItems();
-        alert('Gambar lelongan berjaya di-upload!');
+        renderDetailModal();
+        alert(`Gambar lelongan (${urls.length}) berjaya di-upload!`);
       } catch (err) {
         alert(err.message);
       }
@@ -1297,6 +1642,7 @@
       auctionItems.splice(aucIdx, 1);
       populateOrderItemDropdown();
       renderAuctionItems();
+      closeDetailModal();
     }
 
     document.getElementById('auctionForm').addEventListener('submit', async (e) => {
@@ -1311,7 +1657,6 @@
       const conditionNote = document.getElementById('aucCondition').value.trim();
       const typedUrl = document.getElementById('aucImage').value.trim();
       const fileInput = document.getElementById('aucImageFile');
-      const selectedFile = fileInput.files && fileInput.files[0];
 
       if (!title || isNaN(startPrice) || startPrice < 0) return;
 
@@ -1319,11 +1664,7 @@
       submitAuctionBtn.textContent = 'Sedang menyimpan...';
 
       try {
-        let finalImageUrl = typedUrl;
-        if (selectedFile) {
-          finalImageUrl = await uploadImageToStorage(selectedFile);
-        }
-
+        const imageList = await resolveImagesInput(fileInput.files, typedUrl);
         const safeStart = isNaN(startPrice) ? 0 : startPrice;
         const safeInc = isNaN(bidIncrement) || bidIncrement < 1 ? 5 : bidIncrement;
         const endsIso = endsAtVal ? new Date(endsAtVal).toISOString() : null;
@@ -1333,7 +1674,7 @@
           title,
           category,
           condition_note: conditionNote,
-          image_url: finalImageUrl,
+          image_url: serializeImages(imageList),
           start_price: safeStart,
           current_bid: safeStart,
           highest_bidder: '',
@@ -1625,93 +1966,18 @@
       }
 
       listContainer.innerHTML = `<div class="grid-list">` + filtered.map((item) => {
-        const itemIdx = items.findIndex(x => x.id === item.id);
-        const cat = normalizeCategory(item.category);
         const bought = getBoughtQty(item);
         const total = Math.max(1, Number(item.total) || 1);
         const available = Math.max(0, total - bought);
         const isSoldOut = available === 0;
-        const showNewBadge = isRecentItem(item.created_at);
-
-        const imgSrc = (item.image_url || '').trim();
-        const imgHtml = imgSrc
-          ? `<img src="${escapeAttr(imgSrc)}" alt="${escapeAttr(item.name)}" class="product-img" />`
-          : `<div class="img-placeholder">Tiada Gambar</div>`;
-
-        const orderBtnHtml = isSoldOut
-          ? `<span class="btn-order disabled">SOLD OUT</span>`
-          : `<a href="${escapeAttr(getWhatsAppOrderUrl(item, available))}" target="_blank" rel="noopener noreferrer" class="btn-order">Order Now</a>`;
-
-        const buyers = Array.isArray(item.buyers) ? item.buyers : [];
-        const buyersHtml = buyers.length
-          ? `<ol class="buyer-list">` + buyers.map((b, bIdx) => `
-              <li>
-                <span><strong>${escapeHtml(b.name)}</strong> (${Number(b.qty)})</span>
-                ${isAdmin ? `<button type="button" class="btn-mini-del" onclick="removeBuyer(${itemIdx}, ${bIdx})">x</button>` : ''}
-              </li>
-            `).join('') + `</ol>`
-          : `<div class="item-note" style="margin:0;">Belum ada pembeli.</div>`;
-
-        const buyerFormHtml = isAdmin ? `
-          <form class="buyer-form" onsubmit="addBuyer(event, ${itemIdx})">
-            <input type="text" id="buyerName-${itemIdx}" placeholder="Nama pembeli" required />
-            <input type="number" id="buyerQty-${itemIdx}" min="1" value="1" required />
-            <button type="submit" class="btn-slot">+</button>
-          </form>
-        ` : '';
-
-        const adminActionsHtml = isAdmin ? `
-          <div class="actions">
-            <button type="button" class="btn-slot" onclick="toggleCategory(${itemIdx})">Tukar Kat.</button>
-            <button type="button" class="btn-copy" onclick="copyPromoText('${escapeAttr(item.id)}')">Copy</button>
-            <button type="button" class="btn-slot" onclick="editPrice(${itemIdx})">Harga</button>
-            <button type="button" class="btn-slot" onclick="uploadImageForItem(${itemIdx})">Upload Gbr</button>
-            <button type="button" class="btn-slot" onclick="editImageUrl(${itemIdx})">Link Gbr</button>
-            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, 1)">+1</button>
-            <button type="button" class="btn-slot" onclick="changeTotal(${itemIdx}, -1)">-1</button>
-            <button type="button" class="btn-del" onclick="deleteItem(${itemIdx})">Padam</button>
-          </div>
-        ` : '';
+        const imgs = parseImages(item.image_url);
 
         return `
-          <div class="item-card ${isSoldOut ? 'sold-out' : ''}">
-            <div>
-              ${imgHtml}
-              <div class="badge-row">
-                <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(formatCategoryDisplay(cat))}</span>
-                ${showNewBadge ? `<span class="badge-new">NEW</span>` : ''}
-                <span class="badge">${isSoldOut ? 'SOLD OUT' : available + ' AVAIL'}</span>
-              </div>
+          <div class="item-card ${isSoldOut ? 'sold-out' : ''}" onclick="openDetailModal('item', '${escapeAttr(item.id)}')">
+            ${buildSliderHtml('grid-item-' + item.id, imgs, item.name)}
+            <div class="compact-meta">
               <div class="item-title">${escapeHtml(item.name)}</div>
               <div class="item-price">${escapeHtml(formatPrice(item.price))}</div>
-              ${item.note ? `<div class="item-note">${escapeHtml(item.note)}</div>` : ''}
-
-              <div class="stats">
-                <div>
-                  <div class="stat-num">${total}</div>
-                  <div class="stat-label">Slot</div>
-                </div>
-                <div>
-                  <div class="stat-num">${bought}</div>
-                  <div class="stat-label">Beli</div>
-                </div>
-                <div>
-                  <div class="stat-num">${available}</div>
-                  <div class="stat-label">Baki</div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              ${orderBtnHtml}
-
-              <div class="buyers-box">
-                <div class="buyers-title">Pembeli (${buyers.length})</div>
-                ${buyersHtml}
-                ${buyerFormHtml}
-              </div>
-
-              ${adminActionsHtml}
             </div>
           </div>
         `;
@@ -1726,17 +1992,17 @@
     }
 
     editImageFileInput.addEventListener('change', async (e) => {
-      const file = e.target.files && e.target.files[0];
+      const files = e.target.files;
       const itemIdx = pendingEditImageIdx;
       pendingEditImageIdx = null;
-      if (!file || itemIdx === null || !isAdmin || !supabaseClient) return;
+      if (!files || !files.length || itemIdx === null || !isAdmin || !supabaseClient) return;
 
       const item = items[itemIdx];
       try {
-        const publicUrl = await uploadImageToStorage(file);
+        const urls = await resolveImagesInput(files, '');
         const { data, error } = await supabaseClient
           .from('preorder_items')
-          .update({ image_url: publicUrl })
+          .update({ image_url: serializeImages(urls) })
           .eq('id', item.id)
           .select()
           .single();
@@ -1747,7 +2013,8 @@
         }
         items[itemIdx] = data;
         renderItems();
-        alert('Gambar berjaya di-upload!');
+        renderDetailModal();
+        alert(`Gambar (${urls.length}) berjaya di-upload!`);
       } catch (err) {
         alert(err.message);
       }
@@ -1756,13 +2023,14 @@
     async function editImageUrl(itemIdx) {
       if (!isAdmin || !supabaseClient) return;
       const item = items[itemIdx];
-      const input = prompt(`Masukkan link URL gambar untuk "${item.name}" (atau kosongkan untuk buang):`, item.image_url || '');
+      const existingList = parseImages(item.image_url);
+      const input = prompt(`Masukkan sehingga 4 link URL gambar (pisahkan dengan koma) untuk "${item.name}":`, existingList.join(', '));
       if (input === null) return;
-      const cleanUrl = input.trim();
+      const cleanSerialized = serializeImages(parseImages(input));
 
       const { data, error } = await supabaseClient
         .from('preorder_items')
-        .update({ image_url: cleanUrl })
+        .update({ image_url: cleanSerialized })
         .eq('id', item.id)
         .select()
         .single();
@@ -1773,6 +2041,7 @@
       }
       items[itemIdx] = data;
       renderItems();
+      renderDetailModal();
     }
 
     async function toggleCategory(itemIdx) {
@@ -1796,6 +2065,7 @@
       items[itemIdx] = data;
       if (isAdmin) populateOrderItemDropdown();
       renderItems();
+      renderDetailModal();
     }
 
     async function editPrice(itemIdx) {
@@ -1822,6 +2092,7 @@
       }
       items[itemIdx] = data;
       renderItems();
+      renderDetailModal();
     }
 
     async function addBuyer(e, itemIdx) {
@@ -1848,6 +2119,7 @@
       }
       items[itemIdx] = data;
       renderItems();
+      renderDetailModal();
     }
 
     async function removeBuyer(itemIdx, buyerIdx) {
@@ -1867,6 +2139,7 @@
       }
       items[itemIdx] = data;
       renderItems();
+      renderDetailModal();
     }
 
     async function changeTotal(itemIdx, delta) {
@@ -1889,6 +2162,7 @@
       }
       items[itemIdx] = data;
       renderItems();
+      renderDetailModal();
     }
 
     async function deleteItem(itemIdx) {
@@ -1908,6 +2182,7 @@
       items.splice(itemIdx, 1);
       if (isAdmin) populateOrderItemDropdown();
       renderItems();
+      closeDetailModal();
     }
 
     function escapeHtml(str) {
@@ -1931,7 +2206,6 @@
       const note = document.getElementById('slotNote').value.trim();
       const typedUrl = document.getElementById('itemImage').value.trim();
       const fileInput = document.getElementById('itemImageFile');
-      const selectedFile = fileInput.files && fileInput.files[0];
 
       if (!name || isNaN(total) || total < 1) return;
 
@@ -1939,10 +2213,7 @@
       submitItemBtn.textContent = 'Sedang menyimpan...';
 
       try {
-        let finalImageUrl = typedUrl;
-        if (selectedFile) {
-          finalImageUrl = await uploadImageToStorage(selectedFile);
-        }
+        const imageList = await resolveImagesInput(fileInput.files, typedUrl);
 
         const newItem = {
           id: 'item-' + Date.now(),
@@ -1951,7 +2222,7 @@
           total,
           price: isNaN(price) || price < 0 ? 0 : price,
           note,
-          image_url: finalImageUrl,
+          image_url: serializeImages(imageList),
           buyers: []
         };
 
