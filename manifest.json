@@ -2,14 +2,16 @@
   "name": "PNK VaultTCG",
   "short_name": "PNK VaultTCG",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0b0f17",
   "theme_color": "#0b0f17",
   "icons": [
     {
-      "src": "./pnk-vaulttcg-logo.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
