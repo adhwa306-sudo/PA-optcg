@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PNK VaultTCG</title>
-  <link rel="manifest" href="./manifest.json?v=2" />
-  <link rel="icon" type="image/png" href="./icon-512.png?v=2" />
-  <link rel="apple-touch-icon" href="./icon-512.png?v=2" />
+  <link rel="manifest" href="./manifest.json?v=3" />
+  <link rel="icon" type="image/png" href="./icon-512.png?v=3" />
+  <link rel="apple-touch-icon" href="./icon-512.png?v=3" />
   <meta name="theme-color" content="#0b0f17" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -507,21 +507,33 @@
     }
     .bid-form {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr auto;
       gap: 6px;
       margin-top: 6px;
     }
     .bid-form input {
-      padding: 7px 9px;
-      font-size: 0.82rem;
+      padding: 8px 10px;
+      font-size: 0.86rem;
+      font-weight: 700;
     }
     .btn-bid {
-      grid-column: 1 / -1;
       background: #d97706;
       color: #ffffff;
-      padding: 9px 10px;
+      padding: 9px 14px;
       font-size: 0.84rem;
       font-weight: 700;
+    }
+    .btn-wa-winner {
+      display: block;
+      text-decoration: none;
+      background: #16a34a;
+      color: #ffffff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 10px;
       width: 100%;
     }
     .btn-order {
@@ -555,6 +567,70 @@
       font-weight: 700;
       margin-bottom: 6px;
       color: #1f2937;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .reg-banner {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #78350f;
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .reg-profile-box {
+      background: #ecfdf5;
+      border: 1px solid #6ee7b7;
+      color: #065f46;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .reg-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 7px;
+      margin-top: 6px;
+    }
+    .reg-form input, .reg-form textarea {
+      padding: 7px 9px;
+      font-size: 0.82rem;
+    }
+    .reg-form textarea {
+      min-height: 52px;
+    }
+    .btn-reg {
+      background: #111827;
+      color: #ffffff;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      width: 100%;
+    }
+    .btn-link-sm {
+      background: transparent;
+      color: #1e40af;
+      padding: 2px 6px;
+      font-size: 0.74rem;
+      text-decoration: underline;
+    }
+    .bid-history-list {
+      margin: 6px 0 0;
+      padding-left: 16px;
+      font-size: 0.78rem;
+      color: #374151;
+    }
+    .bid-history-list li {
+      margin-bottom: 3px;
     }
     .buyer-list {
       margin: 0;
@@ -865,6 +941,16 @@
       <input id="editAuctionImageInput" type="file" accept="image/*" multiple style="display:none;" />
     </div>
 
+    <div id="adminBiddersWrap" class="card" style="display:none;">
+      <div class="section-title">
+        <span>Rekod Pembida Berdaftar Lelong (Anti-Scam)</span>
+        <span id="biddersSummary" class="status-pill">0 Pembida</span>
+      </div>
+      <div id="biddersTableContainer" class="orders-table-wrap">
+        <p class="sub" style="padding:12px; margin:0;">Memuatkan rekod pembida...</p>
+      </div>
+    </div>
+
     <div id="adminOrdersWrap" class="card" style="display:none;">
       <div class="section-title">
         <span>Rekod Detail Pembeli (Khusus Admin)</span>
@@ -970,6 +1056,7 @@
     const ADMIN_PIN = 'Adhwa95#1995';
     const WHATSAPP_NUMBER = '60129456492';
     const MAX_IMAGES = 4;
+    const BIDDER_STORAGE_KEY = 'pnk_vaulttcg_registered_bidder';
 
     const CATEGORY_CYCLE = [
       'Pre-Order',
@@ -987,11 +1074,13 @@
     let activeOrderFilter = 'ALL';
     let items = [];
     let auctionItems = [];
+    let auctionBidders = [];
     let buyerOrders = [];
     let supabaseClient = null;
     let pendingEditImageIdx = null;
     let pendingEditAuctionIdx = null;
     let activeModalTarget = null;
+    let editingBidderProfile = false;
 
     const listContainer = document.getElementById('listContainer');
     const auctionContainer = document.getElementById('auctionContainer');
@@ -1006,7 +1095,10 @@
     const adminBtn = document.getElementById('adminBtn');
     const adminFormWrap = document.getElementById('adminFormWrap');
     const adminAuctionWrap = document.getElementById('adminAuctionWrap');
+    const adminBiddersWrap = document.getElementById('adminBiddersWrap');
     const adminOrdersWrap = document.getElementById('adminOrdersWrap');
+    const biddersTableContainer = document.getElementById('biddersTableContainer');
+    const biddersSummary = document.getElementById('biddersSummary');
     const singleSubFilterBar = document.getElementById('singleSubFilterBar');
     const orderItemSelect = document.getElementById('orderItemSelect');
     const ordersTableContainer = document.getElementById('ordersTableContainer');
@@ -1016,6 +1108,51 @@
     const submitOrderBtn = document.getElementById('submitOrderBtn');
     const editImageFileInput = document.getElementById('editImageFileInput');
     const editAuctionImageInput = document.getElementById('editAuctionImageInput');
+
+    function getRegisteredBidder() {
+      try {
+        const raw = localStorage.getItem(BIDDER_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.full_name && parsed.phone && parsed.address) {
+          return {
+            full_name: String(parsed.full_name).trim(),
+            phone: String(parsed.phone).trim(),
+            address: String(parsed.address).trim()
+          };
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    function saveRegisteredBidder(profile) {
+      localStorage.setItem(BIDDER_STORAGE_KEY, JSON.stringify({
+        full_name: String(profile.full_name || '').trim(),
+        phone: String(profile.phone || '').trim(),
+        address: String(profile.address || '').trim()
+      }));
+    }
+
+    function clearRegisteredBidder() {
+      localStorage.removeItem(BIDDER_STORAGE_KEY);
+      editingBidderProfile = false;
+      renderDetailModal();
+    }
+
+    function submitBidderRegistration(e) {
+      e.preventDefault();
+      const fullName = document.getElementById('regFullName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const address = document.getElementById('regAddress').value.trim();
+      if (!fullName || !phone || !address) {
+        alert('Sila lengkapkan Nama Penuh, No. Telefon dan Alamat untuk mendaftar.');
+        return;
+      }
+      saveRegisteredBidder({ full_name: fullName, phone, address });
+      editingBidderProfile = false;
+      alert('Pendaftaran berjaya! Anda kini boleh lawan bid terus dalam app.');
+      renderDetailModal();
+    }
 
     function parseImages(rawVal) {
       if (!rawVal) return [];
@@ -1123,12 +1260,14 @@
 
     function openDetailModal(type, id) {
       activeModalTarget = { type, id };
+      editingBidderProfile = false;
       renderDetailModal();
       detailModal.classList.add('open');
     }
 
     function closeDetailModal() {
       activeModalTarget = null;
+      editingBidderProfile = false;
       detailModal.classList.remove('open');
       detailModalBox.innerHTML = '';
     }
@@ -1225,22 +1364,66 @@
         const inc = Math.max(1, Number(auc.bid_increment) || 5);
         const suggestedBid = auc.highest_bidder ? (currentBid + inc).toFixed(2) : currentBid.toFixed(2);
         const imgs = parseImages(auc.image_url);
+        const bidderProfile = getRegisteredBidder();
 
-        const bidFormHtml = !isClosed ? `
-          <div class="bid-box">
-            <div class="buyers-title">Hantar Tawaran Bid (Ke WhatsApp)</div>
-            <form class="bid-form" onsubmit="submitBuyerBid(event, ${aucIdx})">
-              <input type="text" id="bidderName-${aucIdx}" placeholder="Nama anda" required />
-              <input type="number" id="bidAmount-${aucIdx}" step="0.01" min="0" value="${escapeAttr(suggestedBid)}" required />
-              <button type="submit" class="btn-bid">Bid Sekarang</button>
-            </form>
-          </div>
-        ` : `<div class="item-note" style="text-align:center; font-weight:700;">Lelongan Ditutup</div>`;
+        const itemBids = auctionBidders.filter(b => b.auction_id === auc.id);
+        const historyHtml = itemBids.length
+          ? `<ol class="bid-history-list">` + itemBids.slice(0, 6).map(b => `
+              <li><strong>${escapeHtml(b.full_name)}</strong> — RM ${Number(b.bid_amount || 0).toFixed(2)}</li>
+            `).join('') + `</ol>`
+          : `<div class="item-note" style="margin:4px 0 0;">Belum ada rekod bid.</div>`;
+
+        let bidSectionHtml = '';
+        if (isClosed) {
+          const waWinnerHref = auc.highest_bidder
+            ? getWhatsAppWinnerUrl(auc)
+            : '';
+          bidSectionHtml = `
+            <div class="bid-box">
+              <div class="item-note" style="text-align:center; font-weight:800; color:#111827; margin-bottom:8px;">Lelongan Ditutup</div>
+              ${waWinnerHref ? `<a href="${escapeAttr(waWinnerHref)}" target="_blank" rel="noopener noreferrer" class="btn-wa-winner">Hantar Detail Pemenang ke WhatsApp</a>` : ''}
+            </div>
+          `;
+        } else if (!bidderProfile || editingBidderProfile) {
+          bidSectionHtml = `
+            <div class="bid-box">
+              <div class="buyers-title"><span>Daftar Pembida Wajib (Anti-Scam)</span></div>
+              <div class="reg-banner">Sila isi nama penuh, no. telefon &amp; alamat untuk daftar sekali sebelum mula lawan bid dalam app.</div>
+              <form class="reg-form" onsubmit="submitBidderRegistration(event)">
+                <input type="text" id="regFullName" placeholder="Nama Penuh (ikut IC / sebenar)" value="${escapeAttr(bidderProfile?.full_name || '')}" required />
+                <input type="text" id="regPhone" placeholder="No. Telefon (Contoh: 012-3456789)" value="${escapeAttr(bidderProfile?.phone || '')}" required />
+                <textarea id="regAddress" placeholder="Alamat Penuh / Lokasi COD" required>${escapeHtml(bidderProfile?.address || '')}</textarea>
+                <button type="submit" class="btn-reg">Daftar &amp; Mula Bid</button>
+              </form>
+            </div>
+          `;
+        } else {
+          bidSectionHtml = `
+            <div class="bid-box">
+              <div class="reg-profile-box">
+                <div>
+                  <div><strong>Pembida Berdaftar:</strong> ${escapeHtml(bidderProfile.full_name)}</div>
+                  <div><strong>Tel:</strong> ${escapeHtml(bidderProfile.phone)}</div>
+                </div>
+                <div>
+                  <button type="button" class="btn-link-sm" onclick="editingBidderProfile=true; renderDetailModal();">Ubah</button>
+                  <button type="button" class="btn-link-sm" style="color:#991b1b;" onclick="clearRegisteredBidder()">Reset</button>
+                </div>
+              </div>
+              <div class="buyers-title"><span>Lawan Bid Dalam App (Min. RM ${Number(auc.highest_bidder ? currentBid + inc : currentBid).toFixed(2)})</span></div>
+              <form class="bid-form" onsubmit="submitLiveAppBid(event, ${aucIdx})">
+                <input type="number" id="bidAmount-${aucIdx}" step="0.01" min="0" value="${escapeAttr(suggestedBid)}" required />
+                <button type="submit" id="bidSubmitBtn-${aucIdx}" class="btn-bid">Hantar Bid</button>
+              </form>
+            </div>
+          `;
+        }
 
         const adminAucActions = isAdmin ? `
           <div class="actions">
+            ${auc.highest_bidder ? `<a href="${escapeAttr(getWhatsAppWinnerUrl(auc))}" target="_blank" rel="noopener noreferrer" class="btn-wa-winner" style="margin-bottom:4px;">Send Detail Winner ke WhatsApp</a>` : ''}
             <button type="button" class="btn-slot" onclick="adminSetHighestBid(${aucIdx})">Set Bid</button>
-            <button type="button" class="btn-slot" onclick="toggleAuctionStatus(${aucIdx})">${isClosed ? 'Buka Lelong' : 'Tutup Lelong'}</button>
+            <button type="button" class="btn-slot" onclick="toggleAuctionStatus(${aucIdx})">${isClosed ? 'Buka Lelong' : 'Tutup &amp; Send Winner'}</button>
             <button type="button" class="btn-slot" onclick="uploadImageForAuction(${aucIdx})">Upload Gbr (Max 4)</button>
             <button type="button" class="btn-del" onclick="deleteAuctionItem(${aucIdx})">Padam</button>
           </div>
@@ -1265,8 +1448,10 @@
           <div class="buyers-box" style="margin-bottom:10px;">
             <div style="font-size:0.82rem;"><strong>Highest Bidder:</strong> ${escapeHtml(auc.highest_bidder || 'Belum ada bid')}</div>
             <div style="font-size:0.78rem; color:#6b7280; margin-top:4px;"><strong>Tamat:</strong> ${escapeHtml(formatEndsAt(auc.ends_at))}</div>
+            <div style="margin-top:8px; font-size:0.78rem; font-weight:700; color:#1f2937;">Sejarah Bid Terkini:</div>
+            ${historyHtml}
           </div>
-          ${bidFormHtml}
+          ${bidSectionHtml}
           ${adminAucActions}
         `;
       }
@@ -1281,6 +1466,7 @@
       auctionSection.style.display = isAuc ? 'block' : 'none';
       if (isAuc) {
         loadAuctionItems();
+        loadAuctionBidders();
       }
     }
 
@@ -1373,13 +1559,15 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'PNK VaultTCG Panel Admin — tambah item katalog (max 4 gambar) & lelongan, rekod detail pembeli, dan laraskan slot/bid.';
+        roleDesc.textContent = 'PNK VaultTCG Panel Admin — tambah item katalog & lelongan, semak rekod pembida berdaftar, dan rekod detail pembeli.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
         adminAuctionWrap.style.display = 'block';
+        adminBiddersWrap.style.display = 'block';
         adminOrdersWrap.style.display = 'block';
         populateOrderItemDropdown();
+        loadAuctionBidders();
         loadBuyerOrders();
         loadAuctionItems();
       } else {
@@ -1390,6 +1578,7 @@
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
         adminAuctionWrap.style.display = 'none';
+        adminBiddersWrap.style.display = 'none';
         adminOrdersWrap.style.display = 'none';
       }
       renderItems();
@@ -1482,6 +1671,64 @@
       if (activeModalTarget && activeModalTarget.type === 'auction') renderDetailModal();
     }
 
+    async function loadAuctionBidders() {
+      if (!supabaseClient && !initSupabase()) return;
+      const { data, error } = await supabaseClient
+        .from('auction_bidders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        if (isAdmin) {
+          biddersTableContainer.innerHTML = `<div class="msg-error" style="margin:10px;">Gagal memuatkan rekod pembida: ${escapeHtml(error.message)}</div>`;
+        }
+        return;
+      }
+      auctionBidders = Array.isArray(data) ? data : [];
+      if (isAdmin) renderAuctionBiddersTable();
+      if (activeModalTarget && activeModalTarget.type === 'auction') renderDetailModal();
+    }
+
+    function renderAuctionBiddersTable() {
+      if (!isAdmin) return;
+      biddersSummary.textContent = `${auctionBidders.length} Rekod Bid`;
+
+      if (!auctionBidders.length) {
+        biddersTableContainer.innerHTML = `<p class="sub" style="padding:12px; margin:0;">Belum ada pembida berdaftar yang menghantar bid.</p>`;
+        return;
+      }
+
+      const rowsHtml = auctionBidders.map(b => {
+        const auc = auctionItems.find(a => a.id === b.auction_id);
+        const aucTitle = auc ? auc.title : b.auction_id;
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(b.full_name)}</strong><br/>
+              <span style="color:#374151;">${escapeHtml(b.phone)}</span>
+            </td>
+            <td style="max-width:210px; white-space:pre-line; color:#374151;">${escapeHtml(b.address)}</td>
+            <td><strong>${escapeHtml(aucTitle)}</strong></td>
+            <td><strong>RM ${Number(b.bid_amount || 0).toFixed(2)}</strong></td>
+          </tr>
+        `;
+      }).join('');
+
+      biddersTableContainer.innerHTML = `
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Nama Penuh &amp; No. Tel</th>
+              <th>Alamat</th>
+              <th>Item Lelong</th>
+              <th>Nilai Bid</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      `;
+    }
+
     function formatEndsAt(isoStr) {
       if (!isoStr) return 'Tiada had masa tetap';
       const d = new Date(isoStr);
@@ -1495,46 +1742,106 @@
       });
     }
 
-    function getWhatsAppBidUrl(auc, bidderName, bidAmount) {
+    function getWhatsAppWinnerUrl(auc) {
       const cleanPhone = WHATSAPP_NUMBER.replace(/\D/g, '');
       const catLabel = formatCategoryDisplay(auc.category);
+      const startPrice = Number(auc.start_price) || 0;
+      const finalBid = Math.max(startPrice, Number(auc.current_bid) || 0);
       const message =
-        `Hi PNK VaultTCG, saya nak BID item lelongan ini:\n` +
+        `PEMENANG LELONG PNK VAULTTCG!\n` +
         `• Item: ${auc.title}\n` +
         `• Kategori: ${catLabel}\n` +
-        `• Nama Pembida: ${bidderName}\n` +
-        `• Tawaran Bid: RM ${Number(bidAmount).toFixed(2)}`;
+        `• Bid Menang: RM ${finalBid.toFixed(2)}\n` +
+        `• Nama Penuh Pemenang: ${auc.highest_bidder || '-'}\n` +
+        `• No. Telefon: ${auc.winner_phone || '-'}\n` +
+        `• Alamat: ${auc.winner_address || '-'}`;
       return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     }
 
-    function submitBuyerBid(e, aucIdx) {
+    async function submitLiveAppBid(e, aucIdx) {
       e.preventDefault();
+      if (!supabaseClient && !initSupabase()) return;
       const auc = auctionItems[aucIdx];
       if (!auc) return;
       if (auc.status === 'CLOSED') {
         alert('Lelongan untuk item ini telah ditutup.');
         return;
       }
-      const nameInput = document.getElementById(`bidderName-${aucIdx}`);
+
+      const bidderProfile = getRegisteredBidder();
+      if (!bidderProfile) {
+        editingBidderProfile = true;
+        renderDetailModal();
+        alert('Sila daftar Nama Penuh, No. Telefon & Alamat terlebih dahulu.');
+        return;
+      }
+
       const amtInput = document.getElementById(`bidAmount-${aucIdx}`);
-      const bidderName = nameInput.value.trim();
+      const submitBtn = document.getElementById(`bidSubmitBtn-${aucIdx}`);
       const bidAmount = parseFloat(amtInput.value);
 
       const basePrice = Math.max(Number(auc.current_bid) || 0, Number(auc.start_price) || 0);
       const inc = Math.max(1, Number(auc.bid_increment) || 5);
       const minValid = auc.highest_bidder ? basePrice + inc : Math.max(basePrice, Number(auc.start_price) || 0);
 
-      if (!bidderName) {
-        alert('Sila masukkan nama anda.');
-        return;
-      }
       if (isNaN(bidAmount) || bidAmount < minValid) {
-        alert(`Tawaran minimum ialah RM ${minValid.toFixed(2)}.`);
+        alert(`Tawaran bid minimum ialah RM ${minValid.toFixed(2)}.`);
         return;
       }
 
-      const waUrl = getWhatsAppBidUrl(auc, bidderName, bidAmount);
-      window.open(waUrl, '_blank', 'noopener,noreferrer');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menghantar...';
+      }
+
+      try {
+        const { data: updatedAuc, error: aucErr } = await supabaseClient
+          .from('auction_items')
+          .update({
+            current_bid: bidAmount,
+            highest_bidder: bidderProfile.full_name,
+            winner_phone: bidderProfile.phone,
+            winner_address: bidderProfile.address
+          })
+          .eq('id', auc.id)
+          .select()
+          .single();
+
+        if (aucErr) {
+          alert('Gagal menghantar bid: ' + aucErr.message);
+          return;
+        }
+
+        const bidderRecord = {
+          id: 'bid-' + Date.now(),
+          auction_id: auc.id,
+          full_name: bidderProfile.full_name,
+          phone: bidderProfile.phone,
+          address: bidderProfile.address,
+          bid_amount: bidAmount
+        };
+
+        const { data: insertedBid, error: bidErr } = await supabaseClient
+          .from('auction_bidders')
+          .insert([bidderRecord])
+          .select()
+          .single();
+
+        if (!bidErr && insertedBid) {
+          auctionBidders.unshift(insertedBid);
+        }
+
+        auctionItems[aucIdx] = updatedAuc;
+        renderAuctionItems();
+        if (isAdmin) renderAuctionBiddersTable();
+        renderDetailModal();
+        alert(`Bid RM ${bidAmount.toFixed(2)} berjaya direkodkan dalam app!`);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Hantar Bid';
+        }
+      }
     }
 
     function renderAuctionItems() {
@@ -1564,7 +1871,7 @@
     async function adminSetHighestBid(aucIdx) {
       if (!isAdmin || !supabaseClient) return;
       const auc = auctionItems[aucIdx];
-      const newBidder = prompt('Masukkan nama pembida tertinggi (kosongkan jika tiada):', auc.highest_bidder || '');
+      const newBidder = prompt('Masukkan nama penuh pembida tertinggi (kosongkan jika tiada):', auc.highest_bidder || '');
       if (newBidder === null) return;
       const newBidRaw = prompt('Masukkan nilai bid semasa (RM):', auc.current_bid || auc.start_price || 0);
       if (newBidRaw === null) return;
@@ -1612,6 +1919,9 @@
       auctionItems[aucIdx] = data;
       renderAuctionItems();
       renderDetailModal();
+      if (nextStatus === 'CLOSED' && data.highest_bidder) {
+        window.open(getWhatsAppWinnerUrl(data), '_blank', 'noopener,noreferrer');
+      }
     }
 
     function uploadImageForAuction(aucIdx) {
@@ -1703,6 +2013,8 @@
           start_price: safeStart,
           current_bid: safeStart,
           highest_bidder: '',
+          winner_phone: '',
+          winner_address: '',
           bid_increment: safeInc,
           ends_at: endsIso,
           status: 'OPEN'
@@ -2276,9 +2588,10 @@
     updateAdminUI();
     loadItems();
     loadAuctionItems();
+    loadAuctionBidders();
 
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-      navigator.serviceWorker.register('./sw.js?v=2');
+      navigator.serviceWorker.register('./sw.js?v=3');
     }
   </script>
 </body>
