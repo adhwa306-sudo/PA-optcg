@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PNK vaultTCG</title>
+  <title>PNK VaultTCG</title>
   <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./pnk-vaulttcg-logo.png" />
+  <link rel="apple-touch-icon" href="./pnk-vaulttcg-logo.png" />
   <meta name="theme-color" content="#0b0f17" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,10 +49,25 @@
       flex-wrap: wrap;
       margin-bottom: 8px;
     }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1.5px solid rgba(245, 158, 11, 0.65);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
+      background: #071326;
+    }
     .brand-title {
       margin: 0;
       font-family: 'Syne', 'Plus Jakarta Sans', sans-serif;
-      font-size: 2.25rem;
+      font-size: 2.1rem;
       font-weight: 800;
       letter-spacing: 0.02em;
       line-height: 1.05;
@@ -720,7 +737,8 @@
     @media (max-width: 540px) {
       body { padding: 10px; }
       .hero-card { padding: 16px; }
-      .brand-title { font-size: 1.75rem; }
+      .brand-logo { width: 44px; height: 44px; border-radius: 11px; }
+      .brand-title { font-size: 1.65rem; }
       .grid-list { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .item-card { padding: 8px; }
       .item-title { font-size: 0.86rem; }
@@ -735,13 +753,16 @@
   <div class="container">
     <div class="hero-card">
       <div class="top-bar">
-        <h1 class="brand-title">PNK vault<span>TCG</span></h1>
+        <div class="brand-group">
+          <img src="./pnk-vaulttcg-logo.png" alt="Logo PNK VaultTCG" class="brand-logo" />
+          <h1 class="brand-title">PNK Vault<span>TCG</span></h1>
+        </div>
         <div style="display:flex; gap:8px; align-items:center;">
           <span id="roleBadge" class="status-pill">Mod Lihat Sahaja</span>
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock, Single Card/Slab &amp; Lelong — klik kad untuk lihat detail penuh, slide hingga 4 gambar, dan tempah terus ke WhatsApp.</p>
+      <p class="hero-sub" id="roleDesc">PNK VaultTCG — Pre-Order, Ready Stock, Single Card/Slab &amp; Lelong. Klik kad untuk lihat detail penuh, slide hingga 4 gambar, dan tempah terus ke WhatsApp.</p>
     </div>
 
     <div id="adminFormWrap" class="card" style="display:none;">
@@ -966,7 +987,7 @@
     let supabaseClient = null;
     let pendingEditImageIdx = null;
     let pendingEditAuctionIdx = null;
-    let activeModalTarget = null; // { type: 'item' | 'auction', id: string }
+    let activeModalTarget = null;
 
     const listContainer = document.getElementById('listContainer');
     const auctionContainer = document.getElementById('auctionContainer');
@@ -1348,7 +1369,7 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item katalog (max 4 gambar) & lelongan, rekod detail pembeli, dan laraskan slot/bid.';
+        roleDesc.textContent = 'PNK VaultTCG Panel Admin — tambah item katalog (max 4 gambar) & lelongan, rekod detail pembeli, dan laraskan slot/bid.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
@@ -1360,7 +1381,7 @@
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock, Single Card/Slab & Lelong — klik kad untuk lihat detail penuh, slide hingga 4 gambar, dan tempah terus ke WhatsApp.';
+        roleDesc.textContent = 'PNK VaultTCG — Pre-Order, Ready Stock, Single Card/Slab & Lelong. Klik kad untuk lihat detail penuh, slide hingga 4 gambar, dan tempah terus ke WhatsApp.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
@@ -1474,7 +1495,7 @@
       const cleanPhone = WHATSAPP_NUMBER.replace(/\D/g, '');
       const catLabel = formatCategoryDisplay(auc.category);
       const message =
-        `Hi PNK vaultTCG, saya nak BID item lelongan ini:\n` +
+        `Hi PNK VaultTCG, saya nak BID item lelongan ini:\n` +
         `• Item: ${auc.title}\n` +
         `• Kategori: ${catLabel}\n` +
         `• Nama Pembida: ${bidderName}\n` +
@@ -1913,7 +1934,7 @@
       const priceText = formatPrice(item.price);
       const noteLine = item.note ? `\n• Catatan: ${item.note}` : '';
       const message =
-        `Hi PNK vaultTCG, saya berminat nak order item (${catLabel}) ini:\n` +
+        `Hi PNK VaultTCG, saya berminat nak order item (${catLabel}) ini:\n` +
         `• Kategori: ${catLabel}\n` +
         `• Item: ${item.name}\n` +
         `• Harga: ${priceText}\n` +
@@ -1930,7 +1951,7 @@
       const total = Math.max(1, Number(item.total) || 1);
       const available = Math.max(0, total - bought);
       const text =
-        `PNK vaultTCG — ${catLabel.toUpperCase()}!\n` +
+        `PNK VaultTCG — ${catLabel.toUpperCase()}!\n` +
         `• Kategori: ${catLabel}\n` +
         `• Item: ${item.name}\n` +
         `• Harga: ${formatPrice(item.price)}\n` +
