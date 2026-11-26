@@ -64,7 +64,7 @@
       color: #cbd5e1;
       font-size: 0.92rem;
       line-height: 1.5;
-      max-width: 720px;
+      max-width: 740px;
     }
     .hero-card .status-pill {
       background: rgba(255, 255, 255, 0.12);
@@ -106,6 +106,27 @@
     .status-pill.admin {
       background: #dcfce7;
       color: #166534;
+    }
+    .mode-switch {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .mode-tab {
+      background: #111827;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .mode-tab.active {
+      background: #f59e0b;
+      color: #111827;
+      border-color: #f59e0b;
     }
     .filter-bar {
       display: flex;
@@ -247,6 +268,12 @@
     .item-card.sold-out {
       border-top-color: #dc2626;
     }
+    .item-card.auction-open {
+      border-top-color: #f59e0b;
+    }
+    .item-card.auction-closed {
+      border-top-color: #6b7280;
+    }
     .product-img {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -291,10 +318,6 @@
       background: #e0f2fe;
       color: #075985;
     }
-    .cat-badge.single {
-      background: #ffedd5;
-      color: #9a3412;
-    }
     .cat-badge.onepiece {
       background: #fee2e2;
       color: #991b1b;
@@ -314,6 +337,14 @@
       font-weight: 700;
       background: #dcfce7;
       color: #166534;
+    }
+    .badge.auction-live {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .badge.auction-end {
+      background: #e5e7eb;
+      color: #374151;
     }
     .sold-out .badge {
       background: #fee2e2;
@@ -356,13 +387,51 @@
       margin: 6px 0 10px;
       text-align: center;
     }
+    .stats-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #111827;
+      padding: 8px 6px;
+      border-radius: 8px;
+      margin: 6px 0 10px;
+      text-align: center;
+    }
     .stat-num {
       font-size: 0.9rem;
-      font-weight: 700;
+      font-weight: 800;
     }
     .stat-label {
       font-size: 0.68rem;
       color: #6b7280;
+    }
+    .bid-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 9px;
+      margin-bottom: 10px;
+    }
+    .bid-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .bid-form input {
+      padding: 6px 8px;
+      font-size: 0.8rem;
+    }
+    .btn-bid {
+      grid-column: 1 / -1;
+      background: #d97706;
+      color: #ffffff;
+      padding: 8px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      width: 100%;
     }
     .btn-order {
       display: block;
@@ -530,6 +599,7 @@
       .item-card { padding: 9px; }
       .form-grid { grid-template-columns: 1fr; }
       .buyer-form { grid-template-columns: 1fr; }
+      .bid-form { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -543,7 +613,7 @@
           <button type="button" id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Mod Admin</button>
         </div>
       </div>
-      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock &amp; Single Card/Slab (One Piece, Marvel &amp; Pokémon) — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.</p>
+      <p class="hero-sub" id="roleDesc">Destinasi Pre-Order, Ready Stock, Single Card/Slab &amp; Lelong — semak slot tersedia, harga semasa, bid item lelongan, dan tempah terus ke WhatsApp.</p>
     </div>
 
     <div id="adminFormWrap" class="card" style="display:none;">
@@ -591,6 +661,55 @@
         </div>
       </form>
       <input id="editImageFileInput" type="file" accept="image/*" style="display:none;" />
+    </div>
+
+    <div id="adminAuctionWrap" class="card" style="display:none;">
+      <div class="section-title">
+        <span>Tambah Item Lelong / Auction (Khusus Admin)</span>
+      </div>
+      <form id="auctionForm" class="form-grid-3">
+        <div>
+          <label for="aucTitle">Nama Kad / Slab Lelong</label>
+          <input id="aucTitle" type="text" placeholder="Contoh: Shanks Manga PSA 10" required />
+        </div>
+        <div>
+          <label for="aucCategory">Kategori Kad</label>
+          <select id="aucCategory">
+            <option value="Single Card - One Piece">Single Card — One Piece</option>
+            <option value="Single Card - Marvel">Single Card — Marvel</option>
+            <option value="Single Card - Pokemon">Single Card — Pokémon</option>
+            <option value="Ready Stock">Ready Stock / Slab</option>
+          </select>
+        </div>
+        <div>
+          <label for="aucStartPrice">Harga Mula Bid (RM)</label>
+          <input id="aucStartPrice" type="number" min="0" step="0.01" placeholder="Contoh: 150.00" required />
+        </div>
+        <div>
+          <label for="aucIncrement">Kenaikan Min. Bid (RM)</label>
+          <input id="aucIncrement" type="number" min="1" step="0.01" value="5.00" required />
+        </div>
+        <div>
+          <label for="aucEndsAt">Tamat Lelongan (Pilihan)</label>
+          <input id="aucEndsAt" type="datetime-local" />
+        </div>
+        <div>
+          <label for="aucCondition">Kondisi / Gred / Catatan</label>
+          <input id="aucCondition" type="text" placeholder="Contoh: PSA 10 / Mint / COD Tanjung Malim" />
+        </div>
+        <div>
+          <label for="aucImage">Link Gambar (Pilihan)</label>
+          <input id="aucImage" type="text" placeholder="https://... (jika tak upload fail)" />
+        </div>
+        <div class="full" style="grid-column: span 2;">
+          <label for="aucImageFile">Atau Upload Gambar Lelong Dari Peranti (Pilihan)</label>
+          <input id="aucImageFile" type="file" accept="image/*" />
+        </div>
+        <div class="full">
+          <button type="submit" id="submitAuctionBtn" class="btn-primary">+ Buka Item Lelong Baharu</button>
+        </div>
+      </form>
+      <input id="editAuctionImageInput" type="file" accept="image/*" style="display:none;" />
     </div>
 
     <div id="adminOrdersWrap" class="card" style="display:none;">
@@ -653,22 +772,35 @@
       </div>
     </div>
 
-    <div class="filter-bar">
-      <button type="button" class="filter-btn active" data-cat="ALL" onclick="setCategoryFilter('ALL')">Semua</button>
-      <button type="button" class="filter-btn" data-cat="Pre-Order" onclick="setCategoryFilter('Pre-Order')">Pre-Order</button>
-      <button type="button" class="filter-btn" data-cat="Ready Stock" onclick="setCategoryFilter('Ready Stock')">Ready Stock</button>
-      <button type="button" class="filter-btn" data-cat="Single Card" onclick="setCategoryFilter('Single Card')">Single Card</button>
+    <div class="mode-switch">
+      <button type="button" id="tabCatalog" class="mode-tab active" onclick="setMainSection('CATALOG')">Katalog &amp; Tempahan</button>
+      <button type="button" id="tabAuction" class="mode-tab" onclick="setMainSection('AUCTION')">Lelong / Auction</button>
     </div>
 
-    <div id="singleSubFilterBar" class="sub-filter-bar" style="display:none;">
-      <button type="button" class="sub-filter-btn active" data-subcat="ALL" onclick="setSingleSubFilter('ALL')">Semua Single</button>
-      <button type="button" class="sub-filter-btn" data-subcat="One Piece" onclick="setSingleSubFilter('One Piece')">1. One Piece</button>
-      <button type="button" class="sub-filter-btn" data-subcat="Marvel" onclick="setSingleSubFilter('Marvel')">2. Marvel</button>
-      <button type="button" class="sub-filter-btn" data-subcat="Pokemon" onclick="setSingleSubFilter('Pokemon')">3. Pokémon</button>
+    <div id="catalogSection">
+      <div class="filter-bar">
+        <button type="button" class="filter-btn active" data-cat="ALL" onclick="setCategoryFilter('ALL')">Semua</button>
+        <button type="button" class="filter-btn" data-cat="Pre-Order" onclick="setCategoryFilter('Pre-Order')">Pre-Order</button>
+        <button type="button" class="filter-btn" data-cat="Ready Stock" onclick="setCategoryFilter('Ready Stock')">Ready Stock</button>
+        <button type="button" class="filter-btn" data-cat="Single Card" onclick="setCategoryFilter('Single Card')">Single Card</button>
+      </div>
+
+      <div id="singleSubFilterBar" class="sub-filter-bar" style="display:none;">
+        <button type="button" class="sub-filter-btn active" data-subcat="ALL" onclick="setSingleSubFilter('ALL')">Semua Single</button>
+        <button type="button" class="sub-filter-btn" data-subcat="One Piece" onclick="setSingleSubFilter('One Piece')">1. One Piece</button>
+        <button type="button" class="sub-filter-btn" data-subcat="Marvel" onclick="setSingleSubFilter('Marvel')">2. Marvel</button>
+        <button type="button" class="sub-filter-btn" data-subcat="Pokemon" onclick="setSingleSubFilter('Pokemon')">3. Pokémon</button>
+      </div>
+
+      <div id="listContainer">
+        <div class="card"><p class="sub" style="margin:0;">Sedang memuatkan data...</p></div>
+      </div>
     </div>
 
-    <div id="listContainer">
-      <div class="card"><p class="sub" style="margin:0;">Sedang memuatkan data...</p></div>
+    <div id="auctionSection" style="display:none;">
+      <div id="auctionContainer">
+        <div class="card"><p class="sub" style="margin:0;">Sedang memuatkan item lelongan...</p></div>
+      </div>
     </div>
   </div>
 
@@ -690,26 +822,50 @@
 
     const ADMIN_SESSION_KEY = 'pa_optcg_admin_unlocked';
     let isAdmin = sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
+    let activeMainSection = 'CATALOG';
     let activeCategory = 'ALL';
     let activeSingleSub = 'ALL';
+    let activeOrderFilter = 'ALL';
     let items = [];
+    let auctionItems = [];
     let buyerOrders = [];
     let supabaseClient = null;
     let pendingEditImageIdx = null;
+    let pendingEditAuctionIdx = null;
 
     const listContainer = document.getElementById('listContainer');
+    const auctionContainer = document.getElementById('auctionContainer');
+    const catalogSection = document.getElementById('catalogSection');
+    const auctionSection = document.getElementById('auctionSection');
+    const tabCatalog = document.getElementById('tabCatalog');
+    const tabAuction = document.getElementById('tabAuction');
     const roleBadge = document.getElementById('roleBadge');
     const roleDesc = document.getElementById('roleDesc');
     const adminBtn = document.getElementById('adminBtn');
     const adminFormWrap = document.getElementById('adminFormWrap');
+    const adminAuctionWrap = document.getElementById('adminAuctionWrap');
     const adminOrdersWrap = document.getElementById('adminOrdersWrap');
     const singleSubFilterBar = document.getElementById('singleSubFilterBar');
     const orderItemSelect = document.getElementById('orderItemSelect');
     const ordersTableContainer = document.getElementById('ordersTableContainer');
     const ordersSummary = document.getElementById('ordersSummary');
     const submitItemBtn = document.getElementById('submitItemBtn');
+    const submitAuctionBtn = document.getElementById('submitAuctionBtn');
     const submitOrderBtn = document.getElementById('submitOrderBtn');
     const editImageFileInput = document.getElementById('editImageFileInput');
+    const editAuctionImageInput = document.getElementById('editAuctionImageInput');
+
+    function setMainSection(sec) {
+      activeMainSection = sec;
+      const isAuc = sec === 'AUCTION';
+      tabCatalog.classList.toggle('active', !isAuc);
+      tabAuction.classList.toggle('active', isAuc);
+      catalogSection.style.display = isAuc ? 'none' : 'block';
+      auctionSection.style.display = isAuc ? 'block' : 'none';
+      if (isAuc) {
+        loadAuctionItems();
+      }
+    }
 
     function normalizeCategory(cat) {
       const val = String(cat || '').trim();
@@ -789,6 +945,9 @@
         const cat = normalizeCategory(it.category);
         return `<option value="${escapeAttr(it.id)}" data-name="${escapeAttr(it.name)}" data-cat="${escapeAttr(cat)}">${escapeHtml(it.name)} [${escapeHtml(formatCategoryDisplay(cat))}]</option>`;
       });
+      auctionItems.forEach(auc => {
+        options.push(`<option value="${escapeAttr(auc.id)}" data-name="${escapeAttr(auc.title + ' (Lelong)')}" data-cat="${escapeAttr(normalizeCategory(auc.category))}">${escapeHtml(auc.title)} [Lelong]</option>`);
+      });
       options.push(`<option value="" data-name="Item Manual" data-cat="Pre-Order">Lain-lain / Item Manual</option>`);
       orderItemSelect.innerHTML = options.join('');
     }
@@ -797,23 +956,27 @@
       if (isAdmin) {
         roleBadge.textContent = 'Mod Admin Aktif';
         roleBadge.className = 'status-pill admin';
-        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item Pre-Order, Ready Stock & Single Card (One Piece, Marvel, Pokémon), serta rekod pembeli.';
+        roleDesc.textContent = 'Panel pengurusan PNK vaultTCG — tambah item katalog & lelongan, rekod detail pembeli, dan laraskan slot/bid.';
         adminBtn.textContent = 'Keluar Admin';
         adminBtn.className = 'btn-logout';
         adminFormWrap.style.display = 'block';
+        adminAuctionWrap.style.display = 'block';
         adminOrdersWrap.style.display = 'block';
         populateOrderItemDropdown();
         loadBuyerOrders();
+        loadAuctionItems();
       } else {
         roleBadge.textContent = 'Mod Lihat Sahaja';
         roleBadge.className = 'status-pill';
-        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock & Single Card/Slab (One Piece, Marvel & Pokémon) — semak slot tersedia, harga semasa, dan tempah terus ke WhatsApp.';
+        roleDesc.textContent = 'Destinasi Pre-Order, Ready Stock, Single Card/Slab & Lelong — semak slot tersedia, harga semasa, bid item lelongan, dan tempah terus ke WhatsApp.';
         adminBtn.textContent = 'Mod Admin';
         adminBtn.className = 'btn-admin';
         adminFormWrap.style.display = 'none';
+        adminAuctionWrap.style.display = 'none';
         adminOrdersWrap.style.display = 'none';
       }
       renderItems();
+      renderAuctionItems();
     }
 
     function setCategoryFilter(cat) {
@@ -882,6 +1045,326 @@
       if (isAdmin) populateOrderItemDropdown();
       renderItems();
     }
+
+    async function loadAuctionItems() {
+      if (!supabaseClient && !initSupabase()) return;
+      const { data, error } = await supabaseClient
+        .from('auction_items')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        auctionContainer.innerHTML = `<div class="card"><div class="msg-error">Gagal memuatkan item lelongan: ${escapeHtml(error.message)}</div></div>`;
+        return;
+      }
+      auctionItems = Array.isArray(data) ? data : [];
+      if (isAdmin) populateOrderItemDropdown();
+      renderAuctionItems();
+    }
+
+    function formatEndsAt(isoStr) {
+      if (!isoStr) return 'Tiada had masa tetap';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return 'Tiada had masa tetap';
+      return d.toLocaleString('ms-MY', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function getWhatsAppBidUrl(auc, bidderName, bidAmount) {
+      const cleanPhone = WHATSAPP_NUMBER.replace(/\D/g, '');
+      const catLabel = formatCategoryDisplay(auc.category);
+      const message =
+        `Hi PNK vaultTCG, saya nak BID item lelongan ini:\n` +
+        `• Item: ${auc.title}\n` +
+        `• Kategori: ${catLabel}\n` +
+        `• Nama Pembida: ${bidderName}\n` +
+        `• Tawaran Bid: RM ${Number(bidAmount).toFixed(2)}`;
+      return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    }
+
+    function submitBuyerBid(e, aucIdx) {
+      e.preventDefault();
+      const auc = auctionItems[aucIdx];
+      if (!auc) return;
+      if (auc.status === 'CLOSED') {
+        alert('Lelongan untuk item ini telah ditutup.');
+        return;
+      }
+      const nameInput = document.getElementById(`bidderName-${aucIdx}`);
+      const amtInput = document.getElementById(`bidAmount-${aucIdx}`);
+      const bidderName = nameInput.value.trim();
+      const bidAmount = parseFloat(amtInput.value);
+
+      const basePrice = Math.max(Number(auc.current_bid) || 0, Number(auc.start_price) || 0);
+      const inc = Math.max(1, Number(auc.bid_increment) || 5);
+      const minValid = auc.highest_bidder ? basePrice + inc : Math.max(basePrice, Number(auc.start_price) || 0);
+
+      if (!bidderName) {
+        alert('Sila masukkan nama anda.');
+        return;
+      }
+      if (isNaN(bidAmount) || bidAmount < minValid) {
+        alert(`Tawaran minimum ialah RM ${minValid.toFixed(2)}.`);
+        return;
+      }
+
+      const waUrl = getWhatsAppBidUrl(auc, bidderName, bidAmount);
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function renderAuctionItems() {
+      if (!auctionItems.length) {
+        auctionContainer.innerHTML = `<div class="card"><p class="sub" style="margin:0;">Tiada item lelongan dibuka buat masa ini.</p></div>`;
+        return;
+      }
+
+      auctionContainer.innerHTML = `<div class="grid-list">` + auctionItems.map((auc, aucIdx) => {
+        const isClosed = auc.status === 'CLOSED';
+        const cat = normalizeCategory(auc.category);
+        const startPrice = Number(auc.start_price) || 0;
+        const currentBid = Math.max(startPrice, Number(auc.current_bid) || 0);
+        const inc = Math.max(1, Number(auc.bid_increment) || 5);
+        const suggestedBid = auc.highest_bidder ? (currentBid + inc).toFixed(2) : currentBid.toFixed(2);
+
+        const imgSrc = (auc.image_url || '').trim();
+        const imgHtml = imgSrc
+          ? `<img src="${escapeAttr(imgSrc)}" alt="${escapeAttr(auc.title)}" class="product-img" />`
+          : `<div class="img-placeholder">Tiada Gambar</div>`;
+
+        const bidFormHtml = !isClosed ? `
+          <div class="bid-box">
+            <div class="buyers-title">Hantar Tawaran Bid (Ke WhatsApp)</div>
+            <form class="bid-form" onsubmit="submitBuyerBid(event, ${aucIdx})">
+              <input type="text" id="bidderName-${aucIdx}" placeholder="Nama anda" required />
+              <input type="number" id="bidAmount-${aucIdx}" step="0.01" min="0" value="${escapeAttr(suggestedBid)}" required />
+              <button type="submit" class="btn-bid">Bid Sekarang</button>
+            </form>
+          </div>
+        ` : `<div class="item-note" style="text-align:center; font-weight:700;">Lelongan Ditutup</div>`;
+
+        const adminAucActions = isAdmin ? `
+          <div class="actions">
+            <button type="button" class="btn-slot" onclick="adminSetHighestBid(${aucIdx})">Set Bid</button>
+            <button type="button" class="btn-slot" onclick="toggleAuctionStatus(${aucIdx})">${isClosed ? 'Buka Lelong' : 'Tutup Lelong'}</button>
+            <button type="button" class="btn-slot" onclick="uploadImageForAuction(${aucIdx})">Upload Gbr</button>
+            <button type="button" class="btn-del" onclick="deleteAuctionItem(${aucIdx})">Padam</button>
+          </div>
+        ` : '';
+
+        return `
+          <div class="item-card ${isClosed ? 'auction-closed' : 'auction-open'}">
+            <div>
+              ${imgHtml}
+              <div class="badge-row">
+                <span class="${getCategoryBadgeClass(cat)}">${escapeHtml(formatCategoryDisplay(cat))}</span>
+                <span class="badge ${isClosed ? 'auction-end' : 'auction-live'}">${isClosed ? 'CLOSED' : 'LIVE BID'}</span>
+              </div>
+              <div class="item-title">${escapeHtml(auc.title)}</div>
+              <div class="item-price">Bid Semasa: RM ${currentBid.toFixed(2)}</div>
+              ${auc.condition_note ? `<div class="item-note">${escapeHtml(auc.condition_note)}</div>` : ''}
+
+              <div class="stats-2">
+                <div>
+                  <div class="stat-num">RM ${startPrice.toFixed(2)}</div>
+                  <div class="stat-label">Harga Mula</div>
+                </div>
+                <div>
+                  <div class="stat-num">+RM ${inc.toFixed(2)}</div>
+                  <div class="stat-label">Min. Kenaikan</div>
+                </div>
+              </div>
+
+              <div class="buyers-box" style="margin-bottom:8px;">
+                <div style="font-size:0.78rem;"><strong>Highest Bidder:</strong> ${escapeHtml(auc.highest_bidder || 'Belum ada bid')}</div>
+                <div style="font-size:0.74rem; color:#6b7280; margin-top:3px;"><strong>Tamat:</strong> ${escapeHtml(formatEndsAt(auc.ends_at))}</div>
+              </div>
+            </div>
+
+            <div>
+              ${bidFormHtml}
+              ${adminAucActions}
+            </div>
+          </div>
+        `;
+      }).join('') + `</div>`;
+    }
+
+    async function adminSetHighestBid(aucIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      const auc = auctionItems[aucIdx];
+      const newBidder = prompt('Masukkan nama pembida tertinggi (kosongkan jika tiada):', auc.highest_bidder || '');
+      if (newBidder === null) return;
+      const newBidRaw = prompt('Masukkan nilai bid semasa (RM):', auc.current_bid || auc.start_price || 0);
+      if (newBidRaw === null) return;
+      const bidNum = parseFloat(newBidRaw);
+      if (isNaN(bidNum) || bidNum < 0) {
+        alert('Nilai bid tidak sah.');
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('auction_items')
+        .update({
+          highest_bidder: newBidder.trim(),
+          current_bid: bidNum
+        })
+        .eq('id', auc.id)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Gagal kemas kini bid: ' + error.message);
+        return;
+      }
+      auctionItems[aucIdx] = data;
+      renderAuctionItems();
+    }
+
+    async function toggleAuctionStatus(aucIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      const auc = auctionItems[aucIdx];
+      const nextStatus = auc.status === 'CLOSED' ? 'OPEN' : 'CLOSED';
+
+      const { data, error } = await supabaseClient
+        .from('auction_items')
+        .update({ status: nextStatus })
+        .eq('id', auc.id)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Gagal tukar status lelongan: ' + error.message);
+        return;
+      }
+      auctionItems[aucIdx] = data;
+      renderAuctionItems();
+    }
+
+    function uploadImageForAuction(aucIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      pendingEditAuctionIdx = aucIdx;
+      editAuctionImageInput.value = '';
+      editAuctionImageInput.click();
+    }
+
+    editAuctionImageInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      const aucIdx = pendingEditAuctionIdx;
+      pendingEditAuctionIdx = null;
+      if (!file || aucIdx === null || !isAdmin || !supabaseClient) return;
+
+      const auc = auctionItems[aucIdx];
+      try {
+        const publicUrl = await uploadImageToStorage(file);
+        const { data, error } = await supabaseClient
+          .from('auction_items')
+          .update({ image_url: publicUrl })
+          .eq('id', auc.id)
+          .select()
+          .single();
+
+        if (error) {
+          alert('Gagal simpan gambar lelongan: ' + error.message);
+          return;
+        }
+        auctionItems[aucIdx] = data;
+        renderAuctionItems();
+        alert('Gambar lelongan berjaya di-upload!');
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    async function deleteAuctionItem(aucIdx) {
+      if (!isAdmin || !supabaseClient) return;
+      const auc = auctionItems[aucIdx];
+      if (!confirm(`Padam item lelongan "${auc.title}"?`)) return;
+
+      const { error } = await supabaseClient
+        .from('auction_items')
+        .delete()
+        .eq('id', auc.id);
+
+      if (error) {
+        alert('Gagal padam item lelongan: ' + error.message);
+        return;
+      }
+      auctionItems.splice(aucIdx, 1);
+      populateOrderItemDropdown();
+      renderAuctionItems();
+    }
+
+    document.getElementById('auctionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!isAdmin || !supabaseClient) return;
+
+      const title = document.getElementById('aucTitle').value.trim();
+      const category = normalizeCategory(document.getElementById('aucCategory').value);
+      const startPrice = parseFloat(document.getElementById('aucStartPrice').value);
+      const bidIncrement = parseFloat(document.getElementById('aucIncrement').value);
+      const endsAtVal = document.getElementById('aucEndsAt').value;
+      const conditionNote = document.getElementById('aucCondition').value.trim();
+      const typedUrl = document.getElementById('aucImage').value.trim();
+      const fileInput = document.getElementById('aucImageFile');
+      const selectedFile = fileInput.files && fileInput.files[0];
+
+      if (!title || isNaN(startPrice) || startPrice < 0) return;
+
+      submitAuctionBtn.disabled = true;
+      submitAuctionBtn.textContent = 'Sedang menyimpan...';
+
+      try {
+        let finalImageUrl = typedUrl;
+        if (selectedFile) {
+          finalImageUrl = await uploadImageToStorage(selectedFile);
+        }
+
+        const safeStart = isNaN(startPrice) ? 0 : startPrice;
+        const safeInc = isNaN(bidIncrement) || bidIncrement < 1 ? 5 : bidIncrement;
+        const endsIso = endsAtVal ? new Date(endsAtVal).toISOString() : null;
+
+        const newAuc = {
+          id: 'auc-' + Date.now(),
+          title,
+          category,
+          condition_note: conditionNote,
+          image_url: finalImageUrl,
+          start_price: safeStart,
+          current_bid: safeStart,
+          highest_bidder: '',
+          bid_increment: safeInc,
+          ends_at: endsIso,
+          status: 'OPEN'
+        };
+
+        const { data, error } = await supabaseClient
+          .from('auction_items')
+          .insert([newAuc])
+          .select()
+          .single();
+
+        if (error) {
+          alert('Gagal tambah item lelongan: ' + error.message);
+          return;
+        }
+        auctionItems.unshift(data);
+        e.target.reset();
+        document.getElementById('aucIncrement').value = '5.00';
+        populateOrderItemDropdown();
+        renderAuctionItems();
+        setMainSection('AUCTION');
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        submitAuctionBtn.disabled = false;
+        submitAuctionBtn.textContent = '+ Buka Item Lelong Baharu';
+      }
+    });
 
     async function loadBuyerOrders() {
       if (!isAdmin) return;
@@ -1496,6 +1979,7 @@
 
     updateAdminUI();
     loadItems();
+    loadAuctionItems();
 
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
       navigator.serviceWorker.register('./sw.js');
